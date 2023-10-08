@@ -10,11 +10,7 @@
                         <h1>Manage Users</h1>
                     </div>
                     <div class="col-sm-6">
-                        <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><a href="#">Home</a></li>
-                            <li class="breadcrumb-item"><a href="#">Layout</a></li>
-                            <li class="breadcrumb-item active">Fixed Layout</li>
-                        </ol>
+                        {{--  --}}
                     </div>
                 </div>
             </div><!-- /.container-fluid -->
@@ -89,6 +85,19 @@
                                 </form>
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button class="btn btn-sm btn-info btn-block" data-toggle="modal"
+                                    data-target="#uploadFileModal"><i class="fas fa-file-upload mr-1"></i>
+                                    Upload
+                                    File Excel</button>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="{{ route('manage.users.download_excel') }}"
+                                    class="btn btn-sm btn-secondary btn-block"><i class="fas fa-file-download mr-1"></i>
+                                    Download File Excel</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -96,7 +105,80 @@
         <!-- /.content -->
     </div>
 
-    <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal fade" id="uploadFileModal" tabindex="-1" aria-labelledby="uploadFileModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form class="modal-content" method="POST" action="{{ route('manage.users.upload_excel') }}"
+                enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadFileModalLabel">Upload File Excel</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-danger text-sm">Pastikan kamu telah mendownload format upload file <a
+                            href="{{ route('manage.users.download_excel') }}">disini</a>.</p>
+                    <div class="custom-file">
+                        <input type="file" name="excel" id="excel" class="custom-file-input"
+                            accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+                        <label for="excel" class="custom-file-label">Choose File</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form class="modal-content" method="POST" action="{{ route('manage.users.update') }}">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editUserModalLabel">Edit User : <span id="nameUser"></span></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nameEdit" class="form-label">Nama</label>
+                        <input type="text" class="form-control" id="nameEdit" name="nameEdit"
+                            placeholder="Masukkan nama">
+                    </div>
+                    <div class="mb-3">
+                        <label for="member_idEdit" class="form-label">ID Anggota</label>
+                        <input type="text" class="form-control" id="member_idEdit" name="member_idEdit"
+                            placeholder="Masukkan ID Anggota" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label for="passwordEdit">Password</label>
+                        <input type="text" class="form-control" id="passwordEdit" name="passwordEdit"
+                            placeholder="Masukkan password">
+                    </div>
+                    <div class="mb-3">
+                        <label for="roleEdit" class="form-label">Role</label>
+                        <select class="form-control select2" id="roleEdit" name="roleEdit" style="width: 100%;">
+                            <option value="" selected disabled>-- Pilih role --</option>
+                            @foreach (\Spatie\Permission\Models\Role::get() as $item)
+                                <option value="{{ $item->name }}">{{ $item->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" name="uuid" id="uuid">
+                    <button type="submit" class="btn btn-success btn-block">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -123,6 +205,9 @@
         $(document).ready(function() {
             initTable();
             $('select[name="role"]').select2({
+                theme: 'bootstrap4'
+            })
+            $('select[name="roleEdit"]').select2({
                 theme: 'bootstrap4'
             })
         });
@@ -173,7 +258,7 @@
                         data: 'id',
                         render: function(data, type, row) {
                             return `
-                                <a href="users/view/${row.uuid}" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></a>
+                                <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#editUserModal" onclick="getUserDetail('${row.uuid}')"><i class="fas fa-edit"></i></button>
                                 <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteUserModal" onclick="sendUuid('${row.uuid}')"><i class="fas fa-trash"></i></button>
                             `
                         }
@@ -182,8 +267,27 @@
             });
         }
 
-        function sendUuid(uuid) {
+        function sendUuid(uuid = null) {
             $('#uuid').val(uuid);
+        }
+
+        function getUserDetail(uuid = null) {
+            $.ajax({
+                url: "{{ route('manage.users.detail') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    uuid: uuid
+                },
+                success: function(res) {
+                    $('#nameUser').html(res.name);
+                    $('#uuid').val(res.uuid);
+                    $('#nameEdit').val(res.name);
+                    $('#member_idEdit').val(res.member_id);
+                    $('#passwordEdit').val(res.password);
+                    $('#roleEdit').val(res.role);
+                }
+            })
         }
     </script>
 @endsection

@@ -38,6 +38,18 @@ class DashboardController extends Controller
         return $data;
     }
 
+    public function detail_user(Request $request)
+    {
+        $user = User::where('uuid', $request->uuid)->firstOrFail();
+
+        return response()->json([
+            'name' => $user->name,
+            'member_id' => $user->member_id,
+            'role' => $user->roles->first()->name,
+            'uuid' => $user->uuid,
+        ]);
+    }
+
     public function create_user(Request $request)
     {
         $request->validate([
@@ -56,6 +68,27 @@ class DashboardController extends Controller
         $user->assignRole($request->role);
 
         return redirect(route('manage.users.index'))->with('success', 'Berhasil menambahkan user!');
+    }
+
+    public function update_user(Request $request)
+    {
+        $request->validate([
+            'nameEdit' => 'required|string',
+            'roleEdit' => 'required|string',
+            'passwordEdit' => 'nullable|string|min:8|max:64',
+        ]);
+
+        $user = User::where('uuid', $request->uuid)->firstOrFail();
+
+        $user->update([
+            'name' => $request->nameEdit,
+            'password' => !empty($request->passwordEdit) ? bcrypt($request->passwordEdit) : $user->password,
+        ]);
+
+        $user->removeRole($user->roles->first()->name);
+        $user->assignRole($request->roleEdit);
+
+        return redirect(route('manage.users.index'))->with('success', 'Berhasil mengubah user!');
     }
 
     public function delete_user(Request $request)
