@@ -20,7 +20,7 @@ class UserFactory extends Factory
     {
         return [
             'name' => fake()->name(),
-            'member_id' => fake()->unique()->randomNumber(9),
+            'member_id' => fake()->unique()->randomNumber(9, true),
             'uuid' => Uuid::uuid4()->toString(),
             'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
             'remember_token' => Str::random(10),

@@ -10,4 +10,9 @@ class DashboardController extends Controller
     {
         return view('dashboard.index');
     }
+
+    public function manage_users_get()
+    {
+        return view('dashboard.manage.user');
+    }
 }

@@ -26,10 +26,17 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        Cache::remember('user', now()->addDay(), function () {
-            return Auth::user();
-        });
-
         return redirect()->intended(route('dashboard'));
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login');
     }
 }

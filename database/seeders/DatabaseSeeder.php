@@ -14,8 +14,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
-        $role = Role::create(['name' => 'super-admin']);
+        \App\Models\User::factory(10)->create();
+        $role1 = Role::create(['name' => 'super-admin']);
+        $role2 = Role::create(['name' => 'pengurus-inti']);
+        $role3 = Role::create(['name' => 'koordinator']);
+        $role4 = Role::create(['name' => 'pengurus']);
+
+        $roles = [$role2, $role3, $role4];
 
         $user = \App\Models\User::factory()->create([
             'name' => 'Admin',
@@ -23,7 +28,13 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('password'),
         ]);
 
-        $user->assignRole($role);
+        $user->assignRole($role1);
         $user->givePermissionTo(Permission::all());
+
+        for ($i = 0; $i < 10; $i++) {
+            $user = \App\Models\User::factory()->create();
+
+            $user->assignRole($roles[rand(0, 2)]);
+        }
     }
 }
