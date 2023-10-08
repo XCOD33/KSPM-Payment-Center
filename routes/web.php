@@ -27,7 +27,12 @@ Route::group(['middleware' => 'isLogin'], function () {
     Route::group(['prefix' => 'dashboard'], function () {
         Route::get('/', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
         Route::group(['prefix' => 'manage', 'as' => 'manage.'], function () {
-            Route::get('/users', [App\Http\Controllers\DashboardController::class, 'manage_users_get'])->name('users');
+            Route::group(['prefix' => 'users', 'as' => 'users.'], function () {
+                Route::get('/', [App\Http\Controllers\DashboardController::class, 'manage_users_get'])->name('index');
+                Route::post('/create', [App\Http\Controllers\DashboardController::class, 'create_user'])->name('create');
+                Route::post('/delete', [App\Http\Controllers\DashboardController::class, 'delete_user'])->name('delete');
+            });
+            Route::get('/get-users', [App\Http\Controllers\DashboardController::class, 'get_users'])->name('get_users');
         });
     });
 });

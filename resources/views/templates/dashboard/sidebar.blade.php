@@ -57,8 +57,8 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{ route('manage.users') }}"
-                                class="nav-link {{ Request::routeIs('manage.users') ? 'active' : '' }}">
+                            <a href="{{ route('manage.users.index') }}"
+                                class="nav-link {{ Request::routeIs('manage.users.index') ? 'active' : '' }}">
                                 <i class="fas fa-circle nav-icon"></i>
                                 <p>Users</p>
                             </a>
