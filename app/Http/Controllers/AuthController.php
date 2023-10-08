@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class AuthController extends Controller
 {
@@ -24,6 +25,11 @@ class AuthController extends Controller
         }
 
         $request->session()->regenerate();
+
+        Cache::remember('user', now()->addDay(), function () {
+            return Auth::user();
+        });
+
         return redirect()->intended(route('dashboard'));
     }
 }
