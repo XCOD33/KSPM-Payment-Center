@@ -20,7 +20,7 @@ class DashboardController extends Controller
 
     public function get_users()
     {
-        $users = User::with('roles')->get();
+        $users = User::with('roles')->orderBy('year', 'DESC')->get();
 
         $data = DataTables::of($users)
             ->addIndexColumn()
@@ -29,6 +29,12 @@ class DashboardController extends Controller
             })
             ->addColumn('member_id', function ($q) {
                 return $q->member_id;
+            })
+            ->addColumn('year', function ($q) {
+                return $q->year;
+            })
+            ->addColumn('position', function ($q) {
+                return !empty($q->position->name) ? $q->position->name : 'Tidak ada';
             })
             ->addColumn('roles', function ($q) {
                 return !empty($q->roles->first()->name) ? $q->roles->first()->name : 'Tidak ada';
@@ -46,6 +52,8 @@ class DashboardController extends Controller
             'name' => $user->name,
             'member_id' => $user->member_id,
             'role' => $user->roles->first()->name,
+            'position' => $user->position->id,
+            'year' => $user->year,
             'uuid' => $user->uuid,
         ]);
     }
@@ -57,12 +65,16 @@ class DashboardController extends Controller
             'member_id' => 'required|string|unique:users,member_id|min:9|max:9',
             'password' => 'required|string',
             'role' => 'required|string',
+            'position' => 'required|integer',
+            'year' => 'required|integer',
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'member_id' => $request->member_id,
             'password' => bcrypt($request->password),
+            'position_id' => $request->position,
+            'year' => $request->year,
         ]);
 
         $user->assignRole($request->role);
@@ -76,6 +88,8 @@ class DashboardController extends Controller
             'nameEdit' => 'required|string',
             'roleEdit' => 'required|string',
             'passwordEdit' => 'nullable|string|min:8|max:64',
+            'positionEdit' => 'required',
+            'yearEdit' => 'required',
         ]);
 
         $user = User::where('uuid', $request->uuid)->firstOrFail();
@@ -83,6 +97,8 @@ class DashboardController extends Controller
         $user->update([
             'name' => $request->nameEdit,
             'password' => !empty($request->passwordEdit) ? bcrypt($request->passwordEdit) : $user->password,
+            'position_id' => (int)$request->positionEdit,
+            'year' => (int)$request->yearEdit,
         ]);
 
         $user->removeRole($user->roles->first()->name);

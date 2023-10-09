@@ -1,6 +1,11 @@
 @extends('templates.dashboard.app')
 
 @section('content')
+    @php
+        $role = null;
+        $position = null;
+    @endphp
+
     <div class="content-wrapper">
         <!-- Content Header (Page header) -->
         <section class="content-header">
@@ -36,6 +41,8 @@
                                                 <th>Nama</th>
                                                 <th>ID Anggota</th>
                                                 <th>Roles</th>
+                                                <th>Tahun Aktif</th>
+                                                <th>Divisi</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
@@ -79,6 +86,24 @@
                                             @foreach (\Spatie\Permission\Models\Role::get() as $item)
                                                 <option value="{{ $item->name }}">{{ $item->name }}</option>
                                             @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="position">Divisi</label>
+                                        <select name="position" id="position" class="form-control select2">
+                                            <option value="" selected disabled>-- Pilih Divisi --</option>
+                                            @foreach (\App\Models\Position::get() as $item)
+                                                <option value="{{ $item->id }}">{{ $item->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="year">Tahun Aktif</label>
+                                        <select name="year" id="year" class="form-control select2">
+                                            <option value="" selected disabled>-- Pilih Tahun --</option>
+                                            @for ($i = 2010; $i <= date('Y'); $i++)
+                                                <option value="{{ $i }}">{{ $i }}</option>
+                                            @endfor
                                         </select>
                                     </div>
                                     <button type="submit" class="btn btn-success btn-block">Tambah</button>
@@ -162,10 +187,28 @@
                     <div class="mb-3">
                         <label for="roleEdit" class="form-label">Role</label>
                         <select class="form-control select2" id="roleEdit" name="roleEdit" style="width: 100%;">
-                            <option value="" selected disabled>-- Pilih role --</option>
+                            <option value="" disabled>-- Pilih role --</option>
                             @foreach (\Spatie\Permission\Models\Role::get() as $item)
                                 <option value="{{ $item->name }}">{{ $item->name }}</option>
                             @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="positionEdit">Divisi</label>
+                        <select name="positionEdit" id="positionEdit" class="form-control select2">
+                            <option value="" selected disabled>-- Pilih Divisi --</option>
+                            @foreach (\App\Models\Position::get() as $item)
+                                <option value="{{ $item->id }}">{{ $item->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="yearEdit">Tahun Aktif</label>
+                        <select name="yearEdit" id="yearEdit" class="form-control select2">
+                            <option value="" selected disabled>-- Pilih Tahun --</option>
+                            @for ($i = 2010; $i <= date('Y'); $i++)
+                                <option value="{{ $i }}">{{ $i }}</option>
+                            @endfor
                         </select>
                     </div>
                 </div>
@@ -204,12 +247,6 @@
     <script>
         $(document).ready(function() {
             initTable();
-            $('select[name="role"]').select2({
-                theme: 'bootstrap4'
-            })
-            $('select[name="roleEdit"]').select2({
-                theme: 'bootstrap4'
-            })
         });
 
         function initTable() {
@@ -223,6 +260,8 @@
                             <th>Nama</th>
                             <th>ID Anggota</th>
                             <th>Roles</th>
+                            <th>Tahun Aktif</th>
+                            <th>Divisi</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -255,11 +294,21 @@
                         name: 'roles',
                     },
                     {
+                        data: 'year',
+                        name: 'year',
+                    },
+                    {
+                        data: 'position',
+                        name: 'position',
+                    },
+                    {
                         data: 'id',
                         render: function(data, type, row) {
                             return `
-                                <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#editUserModal" onclick="getUserDetail('${row.uuid}')"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteUserModal" onclick="sendUuid('${row.uuid}')"><i class="fas fa-trash"></i></button>
+                                <div class="btn-group" role="group" aria-label="Basic example">
+                                    <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#editUserModal" onclick="getUserDetail('${row.uuid}')"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteUserModal" onclick="sendUuid('${row.uuid}')"><i class="fas fa-trash"></i></button>
+                                </div>
                             `
                         }
                     }
@@ -286,6 +335,11 @@
                     $('#member_idEdit').val(res.member_id);
                     $('#passwordEdit').val(res.password);
                     $('#roleEdit').val(res.role);
+                    $('#roleEdit').trigger('change');
+                    $('#positionEdit').val(res.position);
+                    $('#positionEdit').trigger('change');
+                    $('#yearEdit').val(res.year);
+                    $('#yearEdit').trigger('change');
                 }
             })
         }

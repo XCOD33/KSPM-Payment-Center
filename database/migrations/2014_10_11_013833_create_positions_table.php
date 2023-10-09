@@ -11,15 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('positions', function (Blueprint $table) {
             $table->id();
             $table->char('uuid')->unique();
             $table->string('name');
-            $table->string('member_id')->unique();
-            $table->foreignId('position_id')->nullable()->constrained('positions')->onDelete('set null');
-            $table->year('year');
-            $table->string('password');
-            $table->rememberToken();
+            $table->text('description')->nullable();
+            $table->enum('can_duplicate', ['yes', 'no'])->default('no');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -30,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('positions');
     }
 };

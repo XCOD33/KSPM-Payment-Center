@@ -25,6 +25,8 @@ class User extends Authenticatable
         'name',
         'member_id',
         'password',
+        'year',
+        'position_id',
     ];
 
     /**
@@ -57,5 +59,10 @@ class User extends Authenticatable
                 abort(500, $e->getMessage());
             }
         });
+    }
+
+    public function position()
+    {
+        return $this->belongsTo(Position::class);
     }
 }
