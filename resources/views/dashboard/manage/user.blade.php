@@ -235,7 +235,7 @@
                 </div>
                 <form action="{{ route('manage.users.delete') }}" method="post" class="modal-footer">
                     @csrf
-                    <input type="hidden" name="uuid" id="uuid">
+                    <input type="hidden" name="uuid" id="uuid" class="uuidDelete">
                     <button type="submit" class="btn btn-danger btn-block">Delete</button>
                 </form>
             </div>
@@ -317,7 +317,7 @@
         }
 
         function sendUuid(uuid = null) {
-            $('#uuid').val(uuid);
+            $('.uuidDelete').val(uuid);
         }
 
         function getUserDetail(uuid = null) {

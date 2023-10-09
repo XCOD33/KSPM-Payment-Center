@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\UsersExport;
+use App\Exports\PositionsExport;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\UsersImport;
 
 class DashboardController extends Controller
 {
@@ -118,5 +122,26 @@ class DashboardController extends Controller
         }
 
         return redirect(route('manage.users.index'))->with('error', 'Gagal menghapus user!');
+    }
+
+    public function upload_excel(Request $request)
+    {
+        Excel::import(new UsersImport, $request->file('excel'));
+
+        return redirect(route('manage.users.index'))->with('success', 'Berhasil menambahkan user!');
+    }
+
+    public function download_excel()
+    {
+        return Excel::download(new class implements \Maatwebsite\Excel\Concerns\WithMultipleSheets
+        {
+            public function sheets(): array
+            {
+                return [
+                    'Data Pengguna' => new UsersExport,
+                    'Posisi Tersedia' => new PositionsExport,
+                ];
+            }
+        }, 'download-format-tambah-anggota.xlsx', \Maatwebsite\Excel\Excel::XLSX);
     }
 }
