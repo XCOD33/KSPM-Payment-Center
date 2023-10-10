@@ -29,8 +29,11 @@
                     <div class="col-md-8">
                         <!-- Default box -->
                         <div class="card card-outline card-primary">
-                            <div class="card-header">
+                            <div class="card-header d-flex justify-content-between">
                                 <h3 class="card-title">Daftar Users</h3>
+                                <a href="{{ route('manage.users.download_excel') . '?dl=all' }}"
+                                    class="btn btn-sm btn-primary d-inline-block ml-auto"><i
+                                        class="fas fa-download mr-1"></i> Download</a>
                             </div>
                             <div class="card-body">
                                 <div id="viewTable" class="table-responsive">
@@ -247,6 +250,10 @@
     <script>
         $(document).ready(function() {
             initTable();
+            $('#excel').on('change', function() {
+                var fileName = $(this).val().split('\\').pop()
+                $('.custom-file-label').text(fileName)
+            })
         });
 
         function initTable() {

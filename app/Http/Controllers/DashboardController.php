@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\UsersExport;
 use App\Exports\PositionsExport;
+use App\Exports\UsersExportAll;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
@@ -131,17 +132,21 @@ class DashboardController extends Controller
         return redirect(route('manage.users.index'))->with('success', 'Berhasil menambahkan user!');
     }
 
-    public function download_excel()
+    public function download_excel(Request $request)
     {
-        return Excel::download(new class implements \Maatwebsite\Excel\Concerns\WithMultipleSheets
-        {
-            public function sheets(): array
+        if ($request->query('dl') == 'all') {
+            return Excel::download(new UsersExportAll, 'daftar-users.xlsx');
+        } else {
+            return Excel::download(new class implements \Maatwebsite\Excel\Concerns\WithMultipleSheets
             {
-                return [
-                    'Data Pengguna' => new UsersExport,
-                    'Posisi Tersedia' => new PositionsExport,
-                ];
-            }
-        }, 'download-format-tambah-anggota.xlsx', \Maatwebsite\Excel\Excel::XLSX);
+                public function sheets(): array
+                {
+                    return [
+                        'Data Pengguna' => new UsersExport,
+                        'Posisi Tersedia' => new PositionsExport,
+                    ];
+                }
+            }, 'download-format-tambah-anggota.xlsx', \Maatwebsite\Excel\Excel::XLSX);
+        }
     }
 }
