@@ -260,7 +260,7 @@
             $('#viewTable').html('')
             $('#viewTable').html(
                 `
-                <table class="table table-bordered table-hover" id="example1">
+                <table class="table table-bordered table-hover" id="table">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -276,7 +276,7 @@
                 `
             );
 
-            $('#example1').DataTable({
+            $('#table').DataTable({
                 processing: true,
                 serverSide: true,
                 paging: true,

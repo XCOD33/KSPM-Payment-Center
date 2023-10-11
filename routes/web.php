@@ -37,6 +37,18 @@ Route::group(['middleware' => 'isLogin'], function () {
                 Route::get('/download-excel', [App\Http\Controllers\DashboardController::class, 'download_excel'])->name('download_excel');
                 Route::post('/upload-excel', [App\Http\Controllers\DashboardController::class, 'upload_excel'])->name('upload_excel');
             });
+            Route::group(['prefix' => 'roles', 'as' => 'roles.'], function () {
+                Route::get('/', [App\Http\Controllers\Dashboards\RolesController::class, 'manage_roles_get'])->name('index');
+                Route::get('/get-roles', [App\Http\Controllers\Dashboards\RolesController::class, 'get_roles'])->name('get_roles');
+                Route::post('/create', [App\Http\Controllers\Dashboards\RolesController::class, 'create'])->name('create');
+                Route::post('/view', [App\Http\Controllers\Dashboards\RolesController::class, 'view'])->name('view');
+                Route::post('/view-roles', [App\Http\Controllers\Dashboards\RolesController::class, 'view_roles'])->name('view_roles');
+                Route::post('/edit', [App\Http\Controllers\Dashboards\RolesController::class, 'edit'])->name('edit');
+                Route::post('/update', [App\Http\Controllers\Dashboards\RolesController::class, 'update'])->name('update');
+                Route::post('/delete', [App\Http\Controllers\Dashboards\RolesController::class, 'delete'])->name('delete');
+                Route::post('/add-user', [App\Http\Controllers\Dashboards\RolesController::class, 'add_user'])->name('add_user');
+                Route::post('/remove-user', [App\Http\Controllers\Dashboards\RolesController::class, 'remove_user'])->name('remove_user');
+            });
             Route::get('/get-users', [App\Http\Controllers\DashboardController::class, 'get_users'])->name('get_users');
         });
     });

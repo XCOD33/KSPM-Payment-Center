@@ -60,14 +60,15 @@
                             <li class="nav-item">
                                 <a href="{{ route('manage.users.index') }}"
                                     class="nav-link {{ Request::routeIs('manage.users.index') ? 'active' : '' }}">
-                                    <i class="fas fa-circle nav-icon"></i>
+                                    <i class="far fa-circle nav-icon"></i>
                                     <p>Users</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="../charts/flot.html" class="nav-link">
+                                <a href="{{ route('manage.roles.index') }}"
+                                    class="nav-link {{ Request::routeIs('manage.roles.index') ? 'active' : '' }}">
                                     <i class="far fa-circle nav-icon"></i>
-                                    <p>Flot</p>
+                                    <p>Roles</p>
                                 </a>
                             </li>
                             <li class="nav-item">
