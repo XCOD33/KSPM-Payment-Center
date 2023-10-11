@@ -19,7 +19,7 @@ class UsersImport implements ToCollection, withHeadingRow, withMultipleSheets
                 'name' => $row['nama_lengkap'],
                 'member_id' => $row['id_anggota'],
                 'year' => $row['tahun'],
-                'position_id' => $row['jabatan_id'],
+                'nim' => $row['nim'],
                 'password' => bcrypt('password'),
             ]);
         }

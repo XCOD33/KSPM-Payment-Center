@@ -27,7 +27,7 @@ class UsersExportAll implements FromCollection, WithHeadings, WithColumnFormatti
                 'name' => $user->name,
                 'member_id' => $user->member_id,
                 'year' => $user->year,
-                'position_id' => $user->position->name,
+                'position' => $user->position->name ?? 'Tidak ada',
             ];
         });
         return $filteredUsers;
@@ -72,6 +72,29 @@ class UsersExportAll implements FromCollection, WithHeadings, WithColumnFormatti
             1 => [
                 'font' => [
                     'bold' => true,
+                ],
+                'alignment' => [
+                    'horizontal' => 'center',
+                ],
+            ],
+            'A' => [
+                'alignment' => [
+                    'horizontal' => 'center',
+                ],
+            ],
+            'C' => [
+                'alignment' => [
+                    'horizontal' => 'center',
+                ],
+            ],
+            'D' => [
+                'alignment' => [
+                    'horizontal' => 'center',
+                ],
+            ],
+            'E' => [
+                'alignment' => [
+                    'horizontal' => 'center',
                 ],
             ],
         ];

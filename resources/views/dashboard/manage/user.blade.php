@@ -43,7 +43,7 @@
                                                 <th>#</th>
                                                 <th>Nama</th>
                                                 <th>ID Anggota</th>
-                                                <th>Roles</th>
+                                                <th>NIM</th>
                                                 <th>Tahun Aktif</th>
                                                 <th>Divisi</th>
                                                 <th>Action</th>
@@ -67,29 +67,28 @@
                                 <form action="{{ route('manage.users.create') }}" method="post">
                                     @csrf
                                     <div class="mb-3">
-                                        <label for="name" class="form-label">Nama</label>
+                                        <label for="name" class="form-label">Nama <span
+                                                class="text-danger">*</span></label>
                                         <input type="text" class="form-control" id="name" name="name"
                                             placeholder="Masukkan nama">
                                     </div>
                                     <div class="mb-3">
-                                        <label for="member_id" class="form-label">ID Anggota</label>
+                                        <label for="member_id" class="form-label">ID Anggota <span
+                                                class="text-danger">*</span></label>
                                         <input type="text" class="form-control" id="member_id" name="member_id"
                                             placeholder="Masukkan ID Anggota">
                                     </div>
                                     <div class="mb-3">
-                                        <label for="password" class="form-label">Password</label>
+                                        <label for="password" class="form-label">Password <span
+                                                class="text-danger">*</span></label>
                                         <input type="text" class="form-control" id="password" name="password"
                                             placeholder="Masukkan password">
                                     </div>
                                     <div class="mb-3">
-                                        <label for="role" class="form-label">Role</label>
-                                        <select class="form-control select2" id="role" name="role"
-                                            style="width: 100%;">
-                                            <option value="" selected disabled>-- Pilih role --</option>
-                                            @foreach (\Spatie\Permission\Models\Role::get() as $item)
-                                                <option value="{{ $item->name }}">{{ $item->name }}</option>
-                                            @endforeach
-                                        </select>
+                                        <label for="nim" class="form-label">NIM <span
+                                                class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="nim" id="nim"
+                                            placeholder="Masukkan NIM">
                                     </div>
                                     <div class="mb-3">
                                         <label for="position">Divisi</label>
@@ -101,10 +100,10 @@
                                         </select>
                                     </div>
                                     <div class="mb-3">
-                                        <label for="year">Tahun Aktif</label>
+                                        <label for="year">Tahun Aktif <span class="text-danger">*</span></label>
                                         <select name="year" id="year" class="form-control select2">
                                             <option value="" selected disabled>-- Pilih Tahun --</option>
-                                            @for ($i = 2010; $i <= date('Y'); $i++)
+                                            @for ($i = date('Y'); $i >= '2010'; $i--)
                                                 <option value="{{ $i }}">{{ $i }}</option>
                                             @endfor
                                         </select>
@@ -173,7 +172,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="nameEdit" class="form-label">Nama</label>
+                        <label for="nameEdit" class="form-label">Nama <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="nameEdit" name="nameEdit"
                             placeholder="Masukkan nama">
                     </div>
@@ -183,30 +182,25 @@
                             placeholder="Masukkan ID Anggota" disabled>
                     </div>
                     <div class="mb-3">
+                        <label for="nimEdit" class="form-label">NIM</label>
+                        <input type="text" class="form-control" name="nimEdit" id="nimEdit" disabled>
+                    </div>
+                    <div class="mb-3">
                         <label for="passwordEdit">Password</label>
                         <input type="text" class="form-control" id="passwordEdit" name="passwordEdit"
                             placeholder="Masukkan password">
                     </div>
                     <div class="mb-3">
-                        <label for="roleEdit" class="form-label">Role</label>
-                        <select class="form-control select2" id="roleEdit" name="roleEdit" style="width: 100%;">
-                            <option value="" disabled>-- Pilih role --</option>
-                            @foreach (\Spatie\Permission\Models\Role::get() as $item)
-                                <option value="{{ $item->name }}">{{ $item->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="positionEdit">Divisi</label>
+                        <label for="positionEdit">Divisi <span class="text-danger">*</span></label>
                         <select name="positionEdit" id="positionEdit" class="form-control select2">
-                            <option value="" selected disabled>-- Pilih Divisi --</option>
+                            <option value="" selected disabled id="positionNull">-- Pilih Divisi --</option>
                             @foreach (\App\Models\Position::get() as $item)
                                 <option value="{{ $item->id }}">{{ $item->name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="yearEdit">Tahun Aktif</label>
+                        <label for="yearEdit">Tahun Aktif <span class="text-danger">*</span></label>
                         <select name="yearEdit" id="yearEdit" class="form-control select2">
                             <option value="" selected disabled>-- Pilih Tahun --</option>
                             @for ($i = 2010; $i <= date('Y'); $i++)
@@ -266,7 +260,7 @@
                             <th>#</th>
                             <th>Nama</th>
                             <th>ID Anggota</th>
-                            <th>Roles</th>
+                            <th>NIM</th>
                             <th>Tahun Aktif</th>
                             <th>Divisi</th>
                             <th>Action</th>
@@ -297,8 +291,8 @@
                         name: 'member_id'
                     },
                     {
-                        data: 'roles',
-                        name: 'roles',
+                        data: 'nim',
+                        name: 'nim',
                     },
                     {
                         data: 'year',
@@ -341,8 +335,7 @@
                     $('#nameEdit').val(res.name);
                     $('#member_idEdit').val(res.member_id);
                     $('#passwordEdit').val(res.password);
-                    $('#roleEdit').val(res.role);
-                    $('#roleEdit').trigger('change');
+                    $('#nimEdit').val(res.nim);
                     $('#positionEdit').val(res.position);
                     $('#positionEdit').trigger('change');
                     $('#yearEdit').val(res.year);

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\UsersImport;
+use App\Models\Position;
 
 class DashboardController extends Controller
 {
@@ -54,12 +55,12 @@ class DashboardController extends Controller
         $user = User::where('uuid', $request->uuid)->firstOrFail();
 
         return response()->json([
-            'name' => $user->name,
-            'member_id' => $user->member_id,
-            'role' => $user->roles->first()->name,
-            'position' => $user->position->id,
-            'year' => $user->year,
-            'uuid' => $user->uuid,
+            'name' => $user->name ?? 'Tidak ada',
+            'member_id' => $user->member_id ?? 'Tidak ada',
+            'nim' => $user->nim ?? 'Tidak ada',
+            'position' => $user->position->id ?? 'Tidak ada',
+            'year' => $user->year ?? 'Tidak ada',
+            'uuid' => $user->uuid ?? 'Tidak ada',
         ]);
     }
 
@@ -69,20 +70,12 @@ class DashboardController extends Controller
             'name' => 'required|string',
             'member_id' => 'required|string|unique:users,member_id|min:9|max:9',
             'password' => 'required|string',
-            'role' => 'required|string',
-            'position' => 'required|integer',
+            'nim' => 'required|string|unique:users,nim|min:10|max:10',
+            'position' => 'integer',
             'year' => 'required|integer',
         ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'member_id' => $request->member_id,
-            'password' => bcrypt($request->password),
-            'position_id' => $request->position,
-            'year' => $request->year,
-        ]);
-
-        $user->assignRole($request->role);
+        User::create($request->all());
 
         return redirect(route('manage.users.index'))->with('success', 'Berhasil menambahkan user!');
     }
@@ -91,23 +84,35 @@ class DashboardController extends Controller
     {
         $request->validate([
             'nameEdit' => 'required|string',
-            'roleEdit' => 'required|string',
             'passwordEdit' => 'nullable|string|min:8|max:64',
             'positionEdit' => 'required',
             'yearEdit' => 'required',
         ]);
 
         $user = User::where('uuid', $request->uuid)->firstOrFail();
+        $positions = Position::all();
+        if (!empty($request->positionEdit)) {
+            foreach ($positions as $position) {
+                if ($position->id == $request->positionEdit && $position->can_duplicate == 'no') {
+                    return back()->with('error', 'Posisi yang dipilih tidak dapat diubah karena posisi ' . $position->name . ' tidak boleh lebih dari satu!');
+                }
+            }
+        }
 
+        if (!empty($request->passwordEdit)) {
+            $request->validate([
+                'passwordEdit' => 'string|min:8|max:64',
+            ]);
+            $request->passwordEdit = bcrypt($request->passwordEdit);
+        } else {
+            $request->passwordEdit = $user->password;
+        }
         $user->update([
             'name' => $request->nameEdit,
-            'password' => !empty($request->passwordEdit) ? bcrypt($request->passwordEdit) : $user->password,
-            'position_id' => (int)$request->positionEdit,
-            'year' => (int)$request->yearEdit,
+            'password' => $request->passwordEdit,
+            'position_id' => $request->positionEdit,
+            'year' => $request->yearEdit,
         ]);
-
-        $user->removeRole($user->roles->first()->name);
-        $user->assignRole($request->roleEdit);
 
         return redirect(route('manage.users.index'))->with('success', 'Berhasil mengubah user!');
     }
@@ -137,16 +142,17 @@ class DashboardController extends Controller
         if ($request->query('dl') == 'all') {
             return Excel::download(new UsersExportAll, 'daftar-users.xlsx');
         } else {
-            return Excel::download(new class implements \Maatwebsite\Excel\Concerns\WithMultipleSheets
-            {
-                public function sheets(): array
-                {
-                    return [
-                        'Data Pengguna' => new UsersExport,
-                        'Posisi Tersedia' => new PositionsExport,
-                    ];
-                }
-            }, 'download-format-tambah-anggota.xlsx', \Maatwebsite\Excel\Excel::XLSX);
+            // return Excel::download(new class implements \Maatwebsite\Excel\Concerns\WithMultipleSheets
+            // {
+            //     public function sheets(): array
+            //     {
+            //         return [
+            //             'Data Pengguna' => new UsersExport,
+            //             'Posisi Tersedia' => new PositionsExport,
+            //         ];
+            //     }
+            // }, 'download-format-tambah-anggota.xlsx', \Maatwebsite\Excel\Excel::XLSX);
+            return Excel::download(new UsersExport, 'download-format-tambah-anggota.xlsx');
         }
     }
 }

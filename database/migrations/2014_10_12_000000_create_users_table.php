@@ -16,6 +16,7 @@ return new class extends Migration
             $table->char('uuid')->unique();
             $table->string('name');
             $table->string('member_id')->unique();
+            $table->string('nim')->unique();
             $table->foreignId('position_id')->nullable()->constrained('positions')->onDelete('set null');
             $table->year('year');
             $table->string('password');

@@ -21,6 +21,7 @@ class UserFactory extends Factory
         return [
             'name' => fake()->name(),
             'member_id' => fake()->unique()->randomNumber(9, true),
+            'nim' => fake()->unique()->numerify('##########'),
             'uuid' => Uuid::uuid4()->toString(),
             'password' => bcrypt('password'), // password
             'year' => fake()->year(),

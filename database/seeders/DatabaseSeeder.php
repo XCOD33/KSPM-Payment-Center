@@ -73,7 +73,7 @@ class DatabaseSeeder extends Seeder
             }
 
 
-            $user->assignRole($roles[rand(0, 2)]);
+            // $user->assignRole($roles[rand(0, 2)]);
         }
     }
 }

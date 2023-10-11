@@ -101,7 +101,9 @@ class RolesController extends Controller
 
         $user->assignRole($request->role);
 
-        return redirect()->back()->with('success', 'Berhasil menambahkan user ke role');
+        return response()->json([
+            'user' => $user,
+        ]);
     }
 
     public function remove_user(Request $request)
@@ -110,6 +112,8 @@ class RolesController extends Controller
 
         $user->roles()->detach();
 
-        return redirect()->back()->with('success', 'Berhasil menghapus user dari role');
+        return response()->json([
+            'success' => true,
+        ]);
     }
 }

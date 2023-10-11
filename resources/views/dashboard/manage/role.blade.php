@@ -86,6 +86,7 @@
                                 </h3>
                             </div>
                             <div class="card-body" id="modalViewTable">
+                                <input type="hidden" name="idRole">
                                 <table class="table table-bordered table-hover" id="viewRoleTable">
                                     <thead>
                                         <tr>
@@ -109,19 +110,23 @@
                                     Tambahkan User</span>
                                 </h3>
                             </div>
-                            <form action="{{ route('manage.roles.add_user') }}" method="POST" class="card-body">
+                            <div id="formAddUserRole" class="card-body">
                                 @csrf
                                 <div class="mb-3">
                                     <input type="hidden" name="role">
                                     <label for="new_user">Nama Anggota</label>
-                                    <select name="new_user" id="new_user" class="select2">
-                                        @foreach (\App\Models\User::doesntHave('roles')->get() as $item)
-                                            <option value="{{ $item->uuid }}">{{ $item->name }}</option>
-                                        @endforeach
-                                    </select>
+                                    <div id="roleContainer">
+                                        <select name="new_user" id="new_user" class="select2">
+                                            @foreach (\App\Models\User::doesntHave('roles')->get() as $item)
+                                                <option value="{{ $item->uuid }}">{{ $item->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 </div>
-                                <button type="submit" class="btn btn-primary btn-block">Tambahkan User</button>
-                            </form>
+                                <button id="submitAddUserRole" type="button" class="btn btn-primary btn-block"
+                                    onclick="addUserRole()">Tambahkan
+                                    User</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -230,6 +235,7 @@
                     id: id
                 },
                 success: function(res) {
+                    $('input[name="idRole"]').val(res.role.id)
                     $('.modalViewTitle').html(res.role.name)
                     $('input[name="role"]').val(res.role.name)
 
@@ -293,6 +299,28 @@
             })
         }
 
+        function addUserRole() {
+            $('#submitAddUserRole').html('Loading...')
+            $('#submitAddUserRole').attr('disabled', true)
+            $.ajax({
+                url: "{{ route('manage.roles.add_user') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    role: $('input[name="role"]').val(),
+                    new_user: $('#new_user').val()
+                },
+                success: function(res) {
+                    $('#submitAddUserRole').html('Tambahkan User')
+                    $('#submitAddUserRole').attr('disabled', false)
+                    $('#new_user').val('')
+                    $('#new_user').trigger('change')
+                    $('option[value="' + res.user.uuid + '"]').remove()
+                    viewRole($('input[name="idRole"]').val())
+                }
+            })
+        }
+
         function editRole(id = null) {
             $.ajax({
                 url: "{{ route('manage.roles.edit') }}",
@@ -351,7 +379,16 @@
                         },
                         success: function(res) {
                             console.log('berhasil hapus')
-                            window.location.href = "{{ route('manage.roles.index') }}"
+                            viewRole($('input[name="idRole"]').val())
+                            $('#roleContainer').html('')
+                            $('#roleContainer').html(`
+                                <select name="new_user" id="new_user" class="form-control">
+                                    @foreach (\App\Models\User::doesntHave('roles')->get() as $item)
+                                        <option value="{{ $item->uuid }}">{{ $item->name }}</option>
+                                    @endforeach
+                                </select>
+                            `)
+                            $('select[name="new_user"]').select2()
                         }
                     })
                 }
