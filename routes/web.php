@@ -51,5 +51,11 @@ Route::group(['middleware' => 'isLogin'], function () {
             });
             Route::get('/get-users', [App\Http\Controllers\DashboardController::class, 'get_users'])->name('get_users');
         });
+        Route::group(['prefix' => 'pembayaran', 'as' => 'pembayaran.'], function () {
+            Route::get('/', [App\Http\Controllers\Dashboards\PembayaranController::class, 'index'])->name('index');
+            Route::get('/get-pembayaran', [App\Http\Controllers\Dashboards\PembayaranController::class, 'get_pembayaran'])->name('get_pembayaran');
+            Route::post('/edit', [App\Http\Controllers\Dashboards\PembayaranController::class, 'edit'])->name('edit');
+            Route::post('/update', [App\Http\Controllers\Dashboards\PembayaranController::class, 'update'])->name('update');
+        });
     });
 });

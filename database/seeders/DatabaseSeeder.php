@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Models\Pembayaran;
 use App\Models\Position;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
@@ -75,5 +76,14 @@ class DatabaseSeeder extends Seeder
 
             // $user->assignRole($roles[rand(0, 2)]);
         }
+
+        Pembayaran::create([
+            'name' => fake()->name(),
+            'nominal' => 100000,
+            'description' => fake()->sentences(3, true),
+            'status' => 'active',
+            'created_by' => 1,
+            'expired_at' => now()->addDays(7),
+        ]);
     }
 }

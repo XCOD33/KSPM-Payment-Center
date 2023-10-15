@@ -66,4 +66,19 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Position::class);
     }
+
+    public function pembayarans()
+    {
+        return $this->hasMany(Pembayaran::class);
+    }
+
+    public function position_pembayarans()
+    {
+        return $this->hasMany(PositionPembayaran::class);
+    }
+
+    public function pembayaran_users()
+    {
+        return $this->hasMany(PembayaranUser::class);
+    }
 }

@@ -47,6 +47,24 @@
                         </p>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link {{ Request::routeIs('pembayaran.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-money-bill"></i>
+                        <p>
+                            Pembayaran
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item {{ Request::routeIs('pembayaran.*') ? 'menu-open' : '' }}">
+                            <a href="{{ route('pembayaran.index') }}"
+                                class="nav-link {{ Request::routeIs('pembayaran.index') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Daftar Pembayaran</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
                 @if (auth()->user()->getRoleNames()->first() == 'super-admin')
                     <li class="nav-item {{ Request::routeIs('manage.*') ? 'menu-open' : '' }}">
                         <a href="#" class="nav-link {{ Request::routeIs('manage.*') ? 'active' : '' }}">
