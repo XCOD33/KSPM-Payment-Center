@@ -22,6 +22,7 @@ class Pembayaran extends Model
 
         static::creating(function ($model) {
             $model->uuid = \Ramsey\Uuid\Uuid::uuid4()->toString();
+            $model->url = bin2hex(random_bytes(3));
         });
     }
 

@@ -107,6 +107,9 @@
         $("input[data-bootstrap-switch]").each(function() {
             $(this).bootstrapSwitch('state', $(this).prop('checked'));
         })
+        $('.text-editor').summernote({
+            'height': 300,
+        })
     </script>
 
     @yield('js')

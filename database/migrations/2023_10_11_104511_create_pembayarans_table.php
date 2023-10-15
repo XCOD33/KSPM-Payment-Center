@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('pembayarans', function (Blueprint $table) {
             $table->id();
             $table->string('uuid')->unique();
+            $table->string('url')->unique();
             $table->string('name');
             $table->bigInteger('nominal');
             $table->text('description');

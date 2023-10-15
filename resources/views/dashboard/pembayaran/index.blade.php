@@ -24,8 +24,12 @@
                     <div class="col-12">
                         <!-- Default box -->
                         <div class="card card-outline card-primary">
-                            <div class="card-header">
+                            <div class="card-header row d-flex justify-content-between">
                                 <h3 class="card-title">Daftar Pembayaran</h3>
+                                <button class="btn btn-sm btn-success ml-auto" id="btnAddModal" data-toggle="modal"
+                                    data-target="#addModal">
+                                    <i class="fas fa-plus"></i> Tambah Pembayaran
+                                </button>
                             </div>
                             <div class="card-body">
                                 <div id="container">
@@ -58,6 +62,68 @@
         <!-- /.content -->
     </div>
 
+    {{-- modal add --}}
+    <div class="modal fade" id="addModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+        aria-labelledby="addModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addModalLabel">Tambah Pembayaran</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="addName">Nama Pembayaran</label>
+                        <input type="text" name="addName" id="addName" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label for="addNominal">Nominal</label>
+                        <input type="number" name="addNominal" id="addNominal" class="form-control">
+                        <p class="text-sm text-danger to_idr"></p>
+                    </div>
+                    <div class="mb-3">
+                        <label for="addExpiredAt">Tanggal Terakhir Pembayaran</label>
+                        <div class="input-group date" id="divAddExpiredAt" data-target-input="nearest">
+                            <input type="text" name="addExpiredAt" id="addExpiredAt"
+                                class="form-control datetimepicker-input" data-target="#divAddExpiredAt">
+                            <div class="input-group-append" data-target="#divAddExpiredAt" data-toggle="datetimepicker">
+                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="addCreatedBy">Dibuat Oleh</label>
+                        <select name="addCreatedBy" id="addCreatedBy" class="form-control select2">
+                            <option value="">-- Pilih --</option>
+                            @foreach (\App\Models\User::with('position')->get() as $user)
+                                <option value="{{ $user->uuid }}"
+                                    {{ $user->uuid == auth()->user()->uuid ? 'selected' : '' }}>{{ $user->name }} -
+                                    {{ $user->position->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="addStatus" class="d-block">Status</label>
+                        <input type="checkbox" name="addStatus" id="addStatus" data-bootstrap-switch>
+                    </div>
+                    <hr>
+                    <div class="mb-3">
+                        <label for="addDescription">Keterangan</label>
+                        <textarea name="addDescription" id="addDescription" class="text-editor">
+
+                        </textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button class="btn btn-primary" onclick="store()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- modal edit --}}
     <div class="modal fade" id="editModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
         aria-labelledby="editModalLabel" aria-hidden="true">
@@ -77,7 +143,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="editNominal">Nominal</label>
-                        <input type="text" name="editNominal" id="editNominal" class="form-control">
+                        <input type="number" name="editNominal" id="editNominal" class="form-control">
                         <p class="text-sm text-danger to_idr"></p>
                     </div>
                     <div class="mb-3">
@@ -119,7 +185,7 @@
     <script>
         $(document).ready(function() {
             initTable();
-            $('#divEditExpiredAt').datetimepicker({
+            $('.date').datetimepicker({
                 icons: {
                     time: 'far fa-clock'
                 },
@@ -128,6 +194,22 @@
             })
             $('input[name=editNominal]').on('keyup', function() {
                 num_to_idr($(this).val())
+            })
+            $('#btnAddModal').on('click', function() {
+                $('#addDescription').summernote('code', '')
+                $('#addExpiredAt').val("{{ now()->addWeeks(1)->format('d-m-Y H:i') }}")
+                num_to_idr($('#addNominal').val())
+
+                $('input[name=addNominal]').on('keyup', function() {
+                    num_to_idr($(this).val())
+                })
+            })
+
+            $('#addModal').on('hidden.bs.modal', function() {
+                $('.to_idr').html('')
+            })
+            $('#editModal').on('hidden.bs.modal', function() {
+                $('.to_idr').html('')
             })
         })
 
@@ -196,7 +278,8 @@
                         render: function(data, type, row) {
                             return `
                                 <div class="btn-group">
-                                    <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#showDetailModal" onclick="showDetail('${row.uuid}')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-sm btn-primary" onclick="showDetail('${row.uuid}')"><i class="fas fa-eye"></i></button>
+                                    <a href="/bayar/${row.url}" target="_blank" class="btn btn-sm btn-info"><i class="fas fa-link"></i></a>
                                     <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#editModal" onclick="showEdit('${row.uuid}')"><i class="fas fa-edit"></i></button>
                                     <button class="btn btn-sm btn-danger" onclick="showDelete('${row.uuid}')"><i class="fas fa-trash-alt"></i></button>
                                 </div>
@@ -213,6 +296,52 @@
                 currency: 'IDR'
             }).format(num)
             $('.to_idr').html(`${toIdr}`)
+        }
+
+        function store() {
+            $.ajax({
+                url: "{{ route('pembayaran.store') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    name: $('#addName').val(),
+                    nominal: $('#addNominal').val(),
+                    expired_at: $('#addExpiredAt').val(),
+                    description: $('#addDescription').val(),
+                    created_by: $('#addCreatedBy').val(),
+                    status: $('#addStatus').bootstrapSwitch('state') == true ? 'active' : 'inactive'
+                },
+                success: function(res) {
+                    if (res.status == 'success') {
+                        $('#addModal').modal('hide')
+                        initTable()
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: res.message,
+                        })
+                        $('#addName').val('')
+                        $('#addNominal').val('')
+                        $('#addExpiredAt').val('')
+                        $('#addDescription').summernote('code', '')
+                        $('#addCreatedBy').val('')
+                        $('#addStatus').bootstrapSwitch('state', false)
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: res.message,
+                        })
+                    }
+                },
+                error: function(err) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: err.message,
+                    })
+                }
+            })
         }
 
         function showDetail() {
@@ -272,6 +401,13 @@
                         })
                     }
                 },
+                error: function(err) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: err.message,
+                    })
+                }
             })
         }
     </script>

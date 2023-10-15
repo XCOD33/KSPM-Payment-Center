@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dashboards;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pembayaran;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
@@ -18,6 +19,13 @@ class PembayaranController extends Controller
     public function get_pembayaran()
     {
         $pembayarans = Pembayaran::with('user')->get();
+
+        foreach ($pembayarans as $pembayaran) {
+            if (now() > $pembayaran->expired_at) {
+                $pembayaran->status = 'inactive';
+                $pembayaran->save();
+            }
+        }
 
         $data = DataTables::of($pembayarans)
             ->addIndexColumn()
@@ -45,6 +53,38 @@ class PembayaranController extends Controller
         return $data;
     }
 
+    public function store(Request $request)
+    {
+        try {
+            $request->validate([
+                'name' => 'required|min:3|max:255',
+                'nominal' => 'required|integer',
+                'expired_at' => 'required|after_or_equal:today',
+                'description' => 'required|min:3|max:255',
+                'status' => 'required|in:active,inactive',
+            ]);
+
+            Pembayaran::create([
+                'name' => $request->name,
+                'nominal' => $request->nominal,
+                'expired_at' => Carbon::createFromFormat('d-m-Y H:i', $request->expired_at)->format('Y-m-d H:i:s'),
+                'description' => $request->description,
+                'status' => $request->status,
+                'created_by' => User::where('uuid', $request->created_by)->first()->id,
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Berhasil menambahkan data pembayaran',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $th->getMessage(),
+            ]);
+        }
+    }
+
     public function edit(Request $request)
     {
         $pembayaran = Pembayaran::where('uuid', $request->uuid)->first();
@@ -58,6 +98,15 @@ class PembayaranController extends Controller
 
     public function update(Request $request)
     {
+        if ($request->status == 'active') {
+            if (now() > Carbon::createFromFormat('d-m-Y H:i', $request->expired_at)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Tanggal terakhir pembayaran tidak boleh kurang dari tanggal sekarang',
+                ]);
+            }
+        }
+
         $pembayaran = Pembayaran::where('uuid', $request->uuid)->first();
 
         $pembayaran->update([
