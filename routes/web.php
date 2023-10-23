@@ -54,10 +54,15 @@ Route::group(['middleware' => 'isLogin'], function () {
         Route::group(['prefix' => 'pembayaran', 'as' => 'pembayaran.'], function () {
             Route::get('/', [App\Http\Controllers\Dashboards\PembayaranController::class, 'index'])->name('index');
             Route::get('/get-pembayaran', [App\Http\Controllers\Dashboards\PembayaranController::class, 'get_pembayaran'])->name('get_pembayaran');
+            Route::post('/get-pembayaran-user', [App\Http\Controllers\Dashboards\PembayaranController::class, 'get_pembayaran_user'])->name('get_pembayaran_user');
+            Route::post('/detail', [App\Http\Controllers\Dashboards\PembayaranController::class, 'detail'])->name('detail');
             Route::post('/store', [App\Http\Controllers\Dashboards\PembayaranController::class, 'store'])->name('store');
             Route::post('/view', [App\Http\Controllers\Dashboards\PembayaranController::class, 'view'])->name('view');
+            Route::get('/{id}', [App\Http\Controllers\Dashboards\PembayaranController::class, 'bayar'])->name('bayar');
+            Route::post('/bayar', [App\Http\Controllers\Dashboards\PembayaranController::class, 'bayar_post'])->name('bayar_post');
             Route::post('/edit', [App\Http\Controllers\Dashboards\PembayaranController::class, 'edit'])->name('edit');
             Route::post('/update', [App\Http\Controllers\Dashboards\PembayaranController::class, 'update'])->name('update');
+            Route::post('/delete', [App\Http\Controllers\Dashboards\PembayaranController::class, 'delete'])->name('delete');
         });
     });
 });

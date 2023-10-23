@@ -16,7 +16,6 @@ return new class extends Migration
             $table->foreignId('pembayaran_id')->constrained('pembayarans')->onDelete('cascade');
             $table->foreignId('position_id')->constrained('positions')->onDelete('cascade');
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 

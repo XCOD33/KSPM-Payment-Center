@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7a4da47ab3b19ec4f866110d70bf9a49",
+    "content-hash": "cb1ee0786890d8762132ee4384207ef0",
     "packages": [
         {
             "name": "brick/math",
@@ -2437,6 +2437,64 @@
                 }
             ],
             "time": "2023-06-21T08:46:11+00:00"
+        },
+        {
+            "name": "nekoding/tripay",
+            "version": "v2.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nekoding/tripay.git",
+                "reference": "2b23f24e9826866aef407b59c321cd4e8df1c787"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/nekoding/tripay/zipball/2b23f24e9826866aef407b59c321cd4e8df1c787",
+                "reference": "2b23f24e9826866aef407b59c321cd4e8df1c787",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.0",
+                "illuminate/support": "^10.18",
+                "php": "^7.4|^8.0|^8.1|^8.2"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^8",
+                "phpunit/phpunit": "^9.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Nekoding\\Tripay\\TripayServiceProvider"
+                    ],
+                    "aliases": {
+                        "Tripay": "Nekoding\\Tripay\\TripayFacade"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Nekoding\\Tripay\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "enggar tivandi",
+                    "email": "enggartivandi@outlook.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Tripay PHP Client for Laravel",
+            "homepage": "https://github.com/nekoding/tripay",
+            "keywords": [
+                "nekoding",
+                "tripay"
+            ],
+            "time": "2023-08-11T14:15:05+00:00"
         },
         {
             "name": "nesbot/carbon",

@@ -32,7 +32,7 @@
                                 </button>
                             </div>
                             <div class="card-body">
-                                <div id="container">
+                                <div id="container" class="table-responsive">
                                     <table class="table table-bordered table-hover" id="main_table">
                                         <thead>
                                             <tr class="text-center">
@@ -60,6 +60,25 @@
             </div>
         </section>
         <!-- /.content -->
+    </div>
+
+    <div class="modal fade" id="detailModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+        aria-labelledby="detailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailModalLabel">Detail Pembayaran</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive" id="detailModalBody">
+
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     {{-- modal add --}}
@@ -103,6 +122,23 @@
                                     {{ $user->position->name }}</option>
                             @endforeach
                         </select>
+                    </div>
+                    <div class="mb-3 row d-flex justify-content-between align-items-end">
+                        <div class="col-9">
+                            <label for="addForPosition">Pembayaran untuk Divisi</label>
+                            <select name="addForPosition" multiple="multiple" id="addForPosition"
+                                class="form-control select2" data-placeholder="Pilih divisi">
+                                @foreach (\App\Models\Position::all() as $position)
+                                    <option value="{{ $position->uuid }}">{{ $position->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="addSelectAll">
+                                <label class="form-check-label" for="addSelectAll">Pilih Semua Divisi</label>
+                            </div>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="addStatus" class="d-block">Status</label>
@@ -160,6 +196,23 @@
                         <label for="editCreatedBy">Dibuat Oleh</label>
                         <input type="text" name="editCreatedBy" id="editCreatedBy" class="form-control" disabled>
                     </div>
+                    <div class="mb-3 row d-flex justify-content-between align-items-end">
+                        <div class="col-9">
+                            <label for="editForPosition">Pembayaran untuk Divisi</label>
+                            <select name="editForPosition" multiple="multiple" id="editForPosition"
+                                class="form-control select2" data-placeholder="Pilih divisi">
+                                @foreach (\App\Models\Position::all() as $position)
+                                    <option value="{{ $position->uuid }}">{{ $position->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="editSelectAll">
+                                <label class="form-check-label" for="editSelectAll">Pilih Semua Divisi</label>
+                            </div>
+                        </div>
+                    </div>
                     <div class="mb-3">
                         <label for="editStatus" class="d-block">Status</label>
                         <input type="checkbox" name="editStatus" id="editStatus" data-bootstrap-switch>
@@ -204,12 +257,33 @@
                     num_to_idr($(this).val())
                 })
             })
+            $('#addSelectAll').on('click', function() {
+                if ($(this).is(':checked')) {
+                    $('#addForPosition').val($('#addForPosition option').map(function() {
+                        return $(this).val()
+                    }).get()).trigger('change')
+                } else {
+                    $('#addForPosition').val('').trigger('change')
+                }
+            })
 
             $('#addModal').on('hidden.bs.modal', function() {
                 $('.to_idr').html('')
             })
             $('#editModal').on('hidden.bs.modal', function() {
                 $('.to_idr').html('')
+            })
+
+            $('#editModal').on('show.bs.modal', function() {
+                $('#editSelectAll').on('click', function() {
+                    if ($(this).is(':checked')) {
+                        $('#editForPosition').val($('#editForPosition option').map(function() {
+                            return $(this).val()
+                        }).get()).trigger('change')
+                    } else {
+                        $('#editForPosition').val('').trigger('change')
+                    }
+                })
             })
         })
 
@@ -278,8 +352,8 @@
                         render: function(data, type, row) {
                             return `
                                 <div class="btn-group">
-                                    <button class="btn btn-sm btn-primary" onclick="showDetail('${row.uuid}')"><i class="fas fa-eye"></i></button>
-                                    <a href="/bayar/${row.url}" target="_blank" class="btn btn-sm btn-info"><i class="fas fa-link"></i></a>
+                                    <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#detailModal" onclick="showDetail('${row.uuid}')"><i class="fas fa-eye"></i></button>
+                                    <a href="pembayaran/${row.url}" target="_blank" class="btn btn-sm btn-info"><i class="fas fa-link"></i></a>
                                     <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#editModal" onclick="showEdit('${row.uuid}')"><i class="fas fa-edit"></i></button>
                                     <button class="btn btn-sm btn-danger" onclick="showDelete('${row.uuid}')"><i class="fas fa-trash-alt"></i></button>
                                 </div>
@@ -309,6 +383,7 @@
                     expired_at: $('#addExpiredAt').val(),
                     description: $('#addDescription').val(),
                     created_by: $('#addCreatedBy').val(),
+                    positions: $('#addForPosition').val(),
                     status: $('#addStatus').bootstrapSwitch('state') == true ? 'active' : 'inactive'
                 },
                 success: function(res) {
@@ -344,8 +419,89 @@
             })
         }
 
-        function showDetail() {
-            console.log('show detail')
+        function showDetail(uuid = null) {
+            $.ajax({
+                url: "{{ route('pembayaran.detail') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    uuid: uuid
+                },
+                success: function(res) {
+                    $('#detailModalLabel').html(`Detail Pembayaran - ${res.data.name}`)
+                    $('#detailModalBody').html(`
+                        <table class="table table-bordered table-hover data-table" id="detail_table">
+                            <thead>
+                                <tr class="text-center">
+                                    <th>#</th>
+                                    <th>Nama User</th>
+                                    <th>NIM</th>
+                                    <th>Posisi</th>
+                                    <th>Tanggal Pembayaran</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    `)
+
+                    $('#detail_table').DataTable({
+                        processing: true,
+                        serverSide: true,
+                        paging: true,
+                        searching: true,
+                        ordering: true,
+                        responsive: true,
+                        autoWidth: true,
+                        ajax: {
+                            url: "{{ route('pembayaran.get_pembayaran_user') }}",
+                            type: "POST",
+                            data: {
+                                _token: "{{ csrf_token() }}",
+                                uuid: uuid
+                            }
+                        },
+                        columns: [{
+                                data: 'DT_RowIndex',
+                                name: 'DT_RowIndex'
+                            },
+                            {
+                                data: 'name',
+                                name: 'name'
+                            },
+                            {
+                                data: 'nim',
+                                name: 'nim'
+                            },
+                            {
+                                data: 'position',
+                                name: 'position'
+                            },
+                            {
+                                data: 'created_at',
+                                name: 'created_at'
+                            },
+                            {
+                                data: 'status',
+                                name: 'status'
+                            },
+                            {
+                                data: 'id',
+                                render: function(data, type, row) {
+                                    return `
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#detailModal" onclick="showDetail('${row.uuid}')"><i class="fas fa-eye"></i></button>
+                                    <a href="pembayaran/${row.url}" target="_blank" class="btn btn-sm btn-info"><i class="fas fa-link"></i></a>
+                                    <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#editModal" onclick="showEdit('${row.uuid}')"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="showDelete('${row.uuid}')"><i class="fas fa-trash-alt"></i></button>
+                                </div>
+                            `
+                                }
+                            },
+                        ]
+                    })
+                },
+            })
         }
 
         function showEdit(uuid = null) {
@@ -363,6 +519,12 @@
                     $('#editNominal').val(res.data.nominal)
                     $('#editExpiredAt').val(res.data.expired_at)
                     $('#editCreatedBy').val(res.data.created_by_name)
+                    $('#editForPosition').val(res.data.positions).change()
+                    if (res.data.positions.length == $('#editForPosition option').length) {
+                        $('#editSelectAll').prop('checked', true)
+                    } else {
+                        $('#editSelectAll').prop('checked', false)
+                    }
                     $('#editDescription').summernote('code', '')
                     $('#editDescription').summernote('editor.pasteHTML', res.data.description)
                     $('#editStatus').bootstrapSwitch('state', res.data.status == 'active' ? true : false)
@@ -382,6 +544,7 @@
                     nominal: $('#editNominal').val(),
                     expired_at: $('#editExpiredAt').val(),
                     description: $('#editDescription').val(),
+                    positions: $('#editForPosition').val(),
                     status: $('#editStatus').bootstrapSwitch('state') == true ? 'active' : 'inactive'
                 },
                 success: function(res) {
@@ -406,6 +569,53 @@
                         icon: 'error',
                         title: 'Gagal',
                         text: err.message,
+                    })
+                }
+            })
+        }
+
+        function showDelete(uuid = null) {
+            Swal.fire({
+                title: 'Apakah anda yakin?',
+                text: "Anda akan menghapus data pembayaran ini!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('pembayaran.delete') }}",
+                        type: "POST",
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            uuid: uuid
+                        },
+                        success: function(res) {
+                            if (res.status == 'success') {
+                                initTable()
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil',
+                                    text: res.message,
+                                })
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal',
+                                    text: res.message,
+                                })
+                            }
+                        },
+                        error: function(err) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal',
+                                text: err.message,
+                            })
+                        }
                     })
                 }
             })
