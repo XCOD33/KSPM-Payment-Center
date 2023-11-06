@@ -79,6 +79,16 @@
                                             placeholder="Masukkan ID Anggota">
                                     </div>
                                     <div class="mb-3">
+                                        <label for="email">Email <span class="text-danger">*</span></label>
+                                        <input type="text" name="email" id="email" class="form-control"
+                                            placeholder="Masukkan Email">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="phone">Nomor Ponsel <span class="text-danger">*</span></label>
+                                        <input type="text" name="phone" id="phone" class="form-control"
+                                            placeholder="Masukkan Nomor Ponsel">
+                                    </div>
+                                    <div class="mb-3">
                                         <label for="password" class="form-label">Password <span
                                                 class="text-danger">*</span></label>
                                         <input type="text" class="form-control" id="password" name="password"
@@ -91,8 +101,8 @@
                                             placeholder="Masukkan NIM">
                                     </div>
                                     <div class="mb-3">
-                                        <label for="position">Divisi</label>
-                                        <select name="position" id="position" class="form-control select2">
+                                        <label for="position_id">Divisi</label>
+                                        <select name="position_id" id="position_id" class="form-control select2">
                                             <option value="" selected disabled>-- Pilih Divisi --</option>
                                             @foreach (\App\Models\Position::get() as $item)
                                                 <option value="{{ $item->id }}">{{ $item->name }}</option>
@@ -132,7 +142,8 @@
         <!-- /.content -->
     </div>
 
-    <div class="modal fade" id="uploadFileModal" tabindex="-1" aria-labelledby="uploadFileModalLabel" aria-hidden="true">
+    <div class="modal fade" id="uploadFileModal" tabindex="-1" aria-labelledby="uploadFileModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog">
             <form class="modal-content" method="POST" action="{{ route('manage.users.upload_excel') }}"
                 enctype="multipart/form-data">
@@ -160,7 +171,8 @@
         </div>
     </div>
 
-    <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal fade" id="editUserModal" data-backdrop="static" tabindex="-1"
+        aria-labelledby="editUserModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <form class="modal-content" method="POST" action="{{ route('manage.users.update') }}">
                 @csrf
@@ -177,13 +189,22 @@
                             placeholder="Masukkan nama">
                     </div>
                     <div class="mb-3">
-                        <label for="member_idEdit" class="form-label">ID Anggota</label>
+                        <label for="member_idEdit" class="form-label">ID Anggota <span
+                                class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="member_idEdit" name="member_idEdit"
-                            placeholder="Masukkan ID Anggota" disabled>
+                            placeholder="Masukkan ID Anggota">
                     </div>
                     <div class="mb-3">
-                        <label for="nimEdit" class="form-label">NIM</label>
-                        <input type="text" class="form-control" name="nimEdit" id="nimEdit" disabled>
+                        <label for="nimEdit" class="form-label">NIM <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="nimEdit" id="nimEdit">
+                    </div>
+                    <div class="mb-3">
+                        <label for="emailEdit">Email <span class="text-danger">*</span></label>
+                        <input type="text" name="emailEdit" id="emailEdit" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label for="phoneEdit">Nomor Ponsel <span class="text-danger">*</span></label>
+                        <input type="text" name="phoneEdit" id="phoneEdit" class="form-control">
                     </div>
                     <div class="mb-3">
                         <label for="passwordEdit">Password</label>
@@ -340,6 +361,8 @@
                     $('#positionEdit').trigger('change');
                     $('#yearEdit').val(res.year);
                     $('#yearEdit').trigger('change');
+                    $('#emailEdit').val(res.email);
+                    $('#phoneEdit').val(res.phone);
                 }
             })
         }

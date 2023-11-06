@@ -4,8 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Permission\Models\Role;
 
-class PositionPembayaran extends Model
+class RolePembayaran extends Model
 {
     use HasFactory;
 
@@ -19,8 +20,8 @@ class PositionPembayaran extends Model
         return $this->belongsTo(Pembayaran::class);
     }
 
-    public function position()
+    public function role()
     {
-        return $this->belongsTo(Position::class);
+        return $this->belongsTo(Role::class);
     }
 }

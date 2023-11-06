@@ -31,9 +31,9 @@ class Pembayaran extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function position_pembayarans()
+    public function role_pembayarans()
     {
-        return $this->hasMany(PositionPembayaran::class);
+        return $this->hasMany(RolePembayaran::class);
     }
 
     public function getBuktiPembayaranPathAttribute($value)

@@ -46,17 +46,18 @@ class DatabaseSeeder extends Seeder
         }
 
         $role1 = Role::create(['name' => 'super-admin']);
-        $role2 = Role::create(['name' => 'pengurus-inti']);
-        $role3 = Role::create(['name' => 'koordinator']);
-        $role4 = Role::create(['name' => 'pengurus']);
+        $role2 = Role::create(['name' => 'pengurus']);
+        $role3 = Role::create(['name' => 'magang']);
 
-        $roles = [$role2, $role3, $role4];
+        $roles = [$role2, $role3];
 
         $user = \App\Models\User::factory()->create([
             'name' => 'Admin',
             'member_id' => '123456789',
             'password' => bcrypt('password'),
             'position_id' => random_int(1, 14),
+            'email' => fake()->email(),
+            'phone' => '08' . fake()->numerify('##########'),
         ]);
 
         $user->assignRole($role1);

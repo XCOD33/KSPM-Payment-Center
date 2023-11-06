@@ -90,9 +90,10 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="../charts/inline.html" class="nav-link">
+                                <a href="{{ route('manage.permission.index') }}"
+                                    class="nav-link {{ Request::routeIs('manage.permission.index') ? 'active' : '' }}">
                                     <i class="far fa-circle nav-icon"></i>
-                                    <p>Inline</p>
+                                    <p>Permission</p>
                                 </a>
                             </li>
                             <li class="nav-item">

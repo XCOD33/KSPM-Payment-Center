@@ -30,15 +30,6 @@ class DashboardController extends Controller
 
         $data = DataTables::of($users)
             ->addIndexColumn()
-            ->addColumn('name', function ($q) {
-                return $q->name;
-            })
-            ->addColumn('member_id', function ($q) {
-                return $q->member_id;
-            })
-            ->addColumn('year', function ($q) {
-                return $q->year;
-            })
             ->addColumn('position', function ($q) {
                 return !empty($q->position->name) ? $q->position->name : 'Tidak ada';
             })
@@ -61,6 +52,8 @@ class DashboardController extends Controller
             'position' => $user->position->id ?? 'Tidak ada',
             'year' => $user->year ?? 'Tidak ada',
             'uuid' => $user->uuid ?? 'Tidak ada',
+            'email' => $user->email ?? 'Tidak ada',
+            'phone' => $user->phone ?? 'Tidak ada',
         ]);
     }
 
@@ -71,11 +64,14 @@ class DashboardController extends Controller
             'member_id' => 'required|string|unique:users,member_id|min:9|max:9',
             'password' => 'required|string',
             'nim' => 'required|string|unique:users,nim|min:10|max:10',
-            'position' => 'integer',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'required|string|min:10|max:13',
+            'position_id' => 'integer',
             'year' => 'required|integer',
         ]);
 
         User::create($request->all());
+
 
         return redirect(route('manage.users.index'))->with('success', 'Berhasil menambahkan user!');
     }
@@ -84,6 +80,10 @@ class DashboardController extends Controller
     {
         $request->validate([
             'nameEdit' => 'required|string',
+            'member_idEdit' => 'required|string|min:9|max:9',
+            'nimEdit' => 'required|string|min:10|max:10',
+            'emailEdit' => 'required|email',
+            'phoneEdit' => 'required|string|min:10|max:13',
             'passwordEdit' => 'nullable|string|min:8|max:64',
             'positionEdit' => 'required',
             'yearEdit' => 'required',
@@ -109,6 +109,10 @@ class DashboardController extends Controller
         }
         $user->update([
             'name' => $request->nameEdit,
+            'nim' => $request->nimEdit,
+            'member_id' => $request->member_idEdit,
+            'email' => $request->emailEdit,
+            'phone' => $request->phoneEdit,
             'password' => $request->passwordEdit,
             'position_id' => $request->positionEdit,
             'year' => $request->yearEdit,
@@ -121,7 +125,9 @@ class DashboardController extends Controller
     {
         $user = User::where('uuid', $request->uuid)->firstOrFail();
 
-        $user->removeRole($user->roles->first()->name);
+        if ($user->roles->first() != null) {
+            $user->removeRole($user->roles->first()->name);
+        }
 
         if ($user->delete()) {
             return redirect(route('manage.users.index'))->with('success', 'Berhasil menghapus user!');

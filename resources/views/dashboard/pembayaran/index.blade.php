@@ -62,9 +62,10 @@
         <!-- /.content -->
     </div>
 
+    {{-- modeal detail --}}
     <div class="modal fade" id="detailModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
         aria-labelledby="detailModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-dialog modal-dialog-scrollable modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="detailModalLabel">Detail Pembayaran</h5>
@@ -125,19 +126,16 @@
                     </div>
                     <div class="mb-3 row d-flex justify-content-between align-items-end">
                         <div class="col-9">
-                            <label for="addForPosition">Pembayaran untuk Divisi</label>
-                            <select name="addForPosition" multiple="multiple" id="addForPosition"
-                                class="form-control select2" data-placeholder="Pilih divisi">
-                                @foreach (\App\Models\Position::all() as $position)
-                                    <option value="{{ $position->uuid }}">{{ $position->name }}</option>
+                            <label for="addForRole">Pembayaran untuk</label>
+                            <select name="addForRole" multiple="multiple" id="addForRole" class="form-control select2"
+                                data-placeholder="Pilih divisi">
+                                @foreach (\Spatie\Permission\Models\Role::all() as $role)
+                                    @if ($role->name == 'super-admin')
+                                        @continue
+                                    @endif
+                                    <option value="{{ $role->id }}">{{ $role->name }}</option>
                                 @endforeach
                             </select>
-                        </div>
-                        <div class="col-3">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="addSelectAll">
-                                <label class="form-check-label" for="addSelectAll">Pilih Semua Divisi</label>
-                            </div>
                         </div>
                     </div>
                     <div class="mb-3">
@@ -198,19 +196,16 @@
                     </div>
                     <div class="mb-3 row d-flex justify-content-between align-items-end">
                         <div class="col-9">
-                            <label for="editForPosition">Pembayaran untuk Divisi</label>
-                            <select name="editForPosition" multiple="multiple" id="editForPosition"
+                            <label for="editForRoles">Pembayaran untuk</label>
+                            <select name="editForRoles" multiple="multiple" id="editForRoles"
                                 class="form-control select2" data-placeholder="Pilih divisi">
-                                @foreach (\App\Models\Position::all() as $position)
-                                    <option value="{{ $position->uuid }}">{{ $position->name }}</option>
+                                @foreach (\Spatie\Permission\Models\Role::all() as $role)
+                                    @if ($role->name == 'super-admin')
+                                        @continue
+                                    @endif
+                                    <option value="{{ $role->id }}">{{ $role->name }}</option>
                                 @endforeach
                             </select>
-                        </div>
-                        <div class="col-3">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="editSelectAll">
-                                <label class="form-check-label" for="editSelectAll">Pilih Semua Divisi</label>
-                            </div>
                         </div>
                     </div>
                     <div class="mb-3">
@@ -256,15 +251,6 @@
                 $('input[name=addNominal]').on('keyup', function() {
                     num_to_idr($(this).val())
                 })
-            })
-            $('#addSelectAll').on('click', function() {
-                if ($(this).is(':checked')) {
-                    $('#addForPosition').val($('#addForPosition option').map(function() {
-                        return $(this).val()
-                    }).get()).trigger('change')
-                } else {
-                    $('#addForPosition').val('').trigger('change')
-                }
             })
 
             $('#addModal').on('hidden.bs.modal', function() {
@@ -383,7 +369,7 @@
                     expired_at: $('#addExpiredAt').val(),
                     description: $('#addDescription').val(),
                     created_by: $('#addCreatedBy').val(),
-                    positions: $('#addForPosition').val(),
+                    roles: $('#addForRole').val(),
                     status: $('#addStatus').bootstrapSwitch('state') == true ? 'active' : 'inactive'
                 },
                 success: function(res) {
@@ -436,8 +422,9 @@
                                     <th>#</th>
                                     <th>Nama User</th>
                                     <th>NIM</th>
-                                    <th>Posisi</th>
+                                    <th>Roles</th>
                                     <th>Tanggal Pembayaran</th>
+                                    <th>ID Pembayaran</th>
                                     <th>Status</th>
                                     <th>Aksi</th>
                                 </tr>
@@ -474,12 +461,16 @@
                                 name: 'nim'
                             },
                             {
-                                data: 'position',
-                                name: 'position'
+                                data: 'roles',
+                                name: 'roles'
                             },
                             {
                                 data: 'created_at',
                                 name: 'created_at'
+                            },
+                            {
+                                data: 'merchant_ref',
+                                name: 'merchant_ref',
                             },
                             {
                                 data: 'status',
@@ -519,12 +510,7 @@
                     $('#editNominal').val(res.data.nominal)
                     $('#editExpiredAt').val(res.data.expired_at)
                     $('#editCreatedBy').val(res.data.created_by_name)
-                    $('#editForPosition').val(res.data.positions).change()
-                    if (res.data.positions.length == $('#editForPosition option').length) {
-                        $('#editSelectAll').prop('checked', true)
-                    } else {
-                        $('#editSelectAll').prop('checked', false)
-                    }
+                    $('#editForRoles').val(res.data.roles).change()
                     $('#editDescription').summernote('code', '')
                     $('#editDescription').summernote('editor.pasteHTML', res.data.description)
                     $('#editStatus').bootstrapSwitch('state', res.data.status == 'active' ? true : false)
@@ -544,7 +530,7 @@
                     nominal: $('#editNominal').val(),
                     expired_at: $('#editExpiredAt').val(),
                     description: $('#editDescription').val(),
-                    positions: $('#editForPosition').val(),
+                    roles: $('#editForRoles').val(),
                     status: $('#editStatus').bootstrapSwitch('state') == true ? 'active' : 'inactive'
                 },
                 success: function(res) {

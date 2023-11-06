@@ -15,8 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('pembayaran_id')->constrained('pembayarans')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('uuid');
             $table->string('bukti_pembayaran')->nullable();
-            $table->enum('status', ['partial', 'full', 'unpaid']);
+            $table->enum('status', ['FAILED', 'PAID', 'EXPIRED', 'UNPAID'])->default('UNPAID');
             $table->timestamps();
             $table->softDeletes();
         });

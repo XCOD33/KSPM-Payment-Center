@@ -190,6 +190,10 @@ return [
         // 'Example' => App\Facades\Example::class,
         'Alert' => RealRashid\SweetAlert\Facades\Alert::class,
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
+        'Tripay' => App\Facades\Tripay::class,
     ])->toArray(),
 
+    'tripay_api_key' => env('TRIPAY_API_KEY'),
+    'tripay_private_key' => env('TRIPAY_PRI_KEY'),
+    'tripay_merchant_code' => env('TRIPAY_MERCHANT_CODE'),
 ];

@@ -28,8 +28,8 @@ class Position extends Model
         return $this->hasMany(User::class);
     }
 
-    public function position_pembayarans()
+    public function role_pembayarans()
     {
-        return $this->hasMany(PositionPembayaran::class);
+        return $this->hasMany(RolePembayaran::class);
     }
 }

@@ -18,8 +18,10 @@ class UsersImport implements ToCollection, withHeadingRow, withMultipleSheets
             User::create([
                 'name' => $row['nama_lengkap'],
                 'member_id' => $row['id_anggota'],
-                'year' => $row['tahun'],
                 'nim' => $row['nim'],
+                'year' => $row['tahun'],
+                'email' => $row['email'],
+                'phone' => $row['no_ponsel'],
                 'password' => bcrypt('password'),
             ]);
         }

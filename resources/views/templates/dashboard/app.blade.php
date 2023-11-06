@@ -109,6 +109,11 @@
         })
         $('.text-editor').summernote({
             'height': 300,
+            toolbar: [
+                ['style', ['bold', 'italic', 'underline', 'clear']],
+                ['fontsize', ['fontsize']],
+                ['para', ['ul', 'ol', 'paragraph']]
+            ]
         })
     </script>
 

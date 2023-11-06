@@ -26,6 +26,8 @@ class UserFactory extends Factory
             'password' => bcrypt('password'), // password
             'year' => fake()->year(),
             'remember_token' => Str::random(10),
+            'email' => fake()->email(),
+            'phone' => '08' . fake()->numerify('##########'),
         ];
     }
 

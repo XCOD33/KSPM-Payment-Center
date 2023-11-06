@@ -44,7 +44,7 @@
                                     </div>
                                     <div class="col">
                                         <p class="h5 text-right">Status : <span
-                                                class="badge {{ $pembayaranUser == null ? 'badge-danger' : 'badge-success' }}">{{ $pembayaranUser == null ? 'Belum Dibayar' : 'Lunas' }}</span>
+                                                class="badge {{ $pembayaranUser && $pembayaranUser->status == 'PAID' ? 'badge-success' : 'badge-secondary' }}">{{ $pembayaranUser->status ?? 'UNPAID' }}</span>
                                         </p>
                                         <p class="h5 text-right">Terakhir Pembayaran :
                                             {{ Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $pembayaran->expired_at)->format('d-M-Y H:i') }}
@@ -54,10 +54,28 @@
                                 <div class="p-3 mb-5 col-xl-12">
                                     {!! $pembayaran->description !!}
                                 </div>
-                                <div class="col-xl-3 mx-auto">
-                                    <button class="btn btn-success btn-block" onclick="bayar('{{ $pembayaran->uuid }}')"><i
-                                            class="fas fa-money-bill-alt mr-1"></i> Bayar</button>
-                                </div>
+                                @if ($pembayaranUser && $pembayaranUser->status == 'PAID')
+                                    <div class="col-xl-6 mx-auto">
+                                        <div class="alert alert-success" role="alert">
+                                            <h4 class="alert-heading">Pembayaran Berhasil!</h4>
+                                            <p>Terima kasih telah melakukan pembayaran. Pembayaran anda telah kami
+                                                terima.</p>
+                                            <hr>
+                                            <p class="mb-0">Silahkan cek email anda untuk mendapatkan bukti
+                                                pembayaran.</p>
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="col-xl-3 mx-auto">
+                                        <div class="mb-3">
+                                            <select name="channel" id="channel" class="form-control select2">
+                                                <option selected disabled>Pilih Channel Pembayaran</option>
+                                            </select>
+                                        </div>
+                                        <button id="btnBayar" class="btn btn-success btn-block" disabled><i
+                                                class="fas fa-money-bill-alt mr-1"></i> Bayar</button>
+                                    </div>
+                                @endif
                                 {{-- <div class="col-xl-12 text-right">
                                     <a href="{{ route('pembayaran.index') }}" class="btn btn-sm btn-secondary"><i
                                             class="fas fa-chevron-left mr-1"></i>
@@ -77,24 +95,78 @@
 
 @section('js')
     <script>
+        $(document).ready(function() {
+            getChannelPembayarans();
+            $('#btnBayar').click(function() {
+                bayar("{{ $pembayaran->uuid }}");
+                e.preventDefault();
+            });
+        })
+
+        function getChannelPembayarans() {
+            $.ajax({
+                url: "{{ route('pembayaran.channel') }}",
+                type: "GET",
+                success: function(response) {
+                    if (response.status == 'success') {
+                        console.log(response.data.data)
+                        let channel = response.data.data;
+                        let html = '';
+                        html += `<option selected disabled>Pilih Channel Pembayaran</option>`;
+                        channel.forEach(function(item) {
+                            html += `<option value="${item.code}">${item.name}</option>`;
+                        })
+                        $('#channel').html(html);
+                        $('#channel').change(function() {
+                            if ($(this).val() != '') {
+                                $('#btnBayar').removeAttr('disabled');
+                            } else {
+                                $('#btnBayar').attr('disabled', 'disabled');
+                            }
+                        })
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: response.message,
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                    }
+                },
+                error: function(xhr, ajaxOptions, thrownError) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: xhr.responseJSON.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                }
+            })
+        }
+
         function bayar(uuid = null) {
             $.ajax({
                 url: "{{ route('pembayaran.bayar_post') }}",
                 type: "POST",
                 data: {
                     _token: "{{ csrf_token() }}",
-                    uuid: uuid
+                    uuid: uuid,
+                    channel: $('#channel').val(),
+                    phoneNumber: $('#phoneNumber').val()
                 },
                 success: function(response) {
+                    console.log(response.data.data)
                     if (response.status == 'success') {
                         Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil',
+                            icon: 'info',
+                            title: 'Melanjutkan Pembayaran',
                             text: response.message,
                             showConfirmButton: false,
                             timer: 1500
                         }).then(function() {
-                            window.location.href = "{{ route('pembayaran.index') }}";
+                            window.location.href = response.data.data.checkout_url;
                         });
                     } else {
                         Swal.fire({

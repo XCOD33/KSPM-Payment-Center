@@ -28,6 +28,8 @@ class UsersExportAll implements FromCollection, WithHeadings, WithColumnFormatti
                 'member_id' => $user->member_id,
                 'year' => $user->year,
                 'position' => $user->position->name ?? 'Tidak ada',
+                'email' => $user->email,
+                'phone' => $user->phone,
             ];
         });
         return $filteredUsers;
@@ -41,6 +43,8 @@ class UsersExportAll implements FromCollection, WithHeadings, WithColumnFormatti
             'ID Anggota',
             'Tahun',
             'Jabatan',
+            'Email',
+            'No Ponsel',
         ];
     }
 
@@ -52,6 +56,8 @@ class UsersExportAll implements FromCollection, WithHeadings, WithColumnFormatti
             'C' => NumberFormat::FORMAT_NUMBER,
             'D' => '@',
             'E' => '@',
+            'F' => '@',
+            'G' => '@',
         ];
     }
 
@@ -63,6 +69,8 @@ class UsersExportAll implements FromCollection, WithHeadings, WithColumnFormatti
             'C' => 15,
             'D' => 15,
             'E' => 30,
+            'F' => 30,
+            'G' => 15,
         ];
     }
 
@@ -97,6 +105,7 @@ class UsersExportAll implements FromCollection, WithHeadings, WithColumnFormatti
                     'horizontal' => 'center',
                 ],
             ],
+
         ];
     }
 }

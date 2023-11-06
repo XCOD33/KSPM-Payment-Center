@@ -22,6 +22,8 @@ class UsersExport implements WithHeadings, WithColumnFormatting, withColumnWidth
             'ID Anggota',
             'NIM',
             'Tahun',
+            'Email',
+            'No Ponsel',
         ];
     }
 
@@ -32,6 +34,8 @@ class UsersExport implements WithHeadings, WithColumnFormatting, withColumnWidth
             'B' => NumberFormat::FORMAT_NUMBER,
             'C' => NumberFormat::FORMAT_NUMBER,
             'D' => '@',
+            'E' => '@',
+            'F' => '@',
         ];
     }
 
@@ -42,6 +46,8 @@ class UsersExport implements WithHeadings, WithColumnFormatting, withColumnWidth
             'B' => 15,
             'C' => 15,
             'D' => 10,
+            'E' => 30,
+            'F' => 15,
         ];
     }
 

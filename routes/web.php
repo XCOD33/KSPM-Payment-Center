@@ -49,6 +49,9 @@ Route::group(['middleware' => 'isLogin'], function () {
                 Route::post('/add-user', [App\Http\Controllers\Dashboards\RolesController::class, 'add_user'])->name('add_user');
                 Route::post('/remove-user', [App\Http\Controllers\Dashboards\RolesController::class, 'remove_user'])->name('remove_user');
             });
+            Route::group(['prefix' => 'permission', 'as' => 'permission.'], function () {
+                Route::get('/', [App\Http\Controllers\Dashboards\PermissionController::class, 'index'])->name('index');
+            });
             Route::get('/get-users', [App\Http\Controllers\DashboardController::class, 'get_users'])->name('get_users');
         });
         Route::group(['prefix' => 'pembayaran', 'as' => 'pembayaran.'], function () {
@@ -58,6 +61,7 @@ Route::group(['middleware' => 'isLogin'], function () {
             Route::post('/detail', [App\Http\Controllers\Dashboards\PembayaranController::class, 'detail'])->name('detail');
             Route::post('/store', [App\Http\Controllers\Dashboards\PembayaranController::class, 'store'])->name('store');
             Route::post('/view', [App\Http\Controllers\Dashboards\PembayaranController::class, 'view'])->name('view');
+            Route::get('/channel', [App\Http\Controllers\Dashboards\PembayaranController::class, 'channel'])->name('channel');
             Route::get('/{id}', [App\Http\Controllers\Dashboards\PembayaranController::class, 'bayar'])->name('bayar');
             Route::post('/bayar', [App\Http\Controllers\Dashboards\PembayaranController::class, 'bayar_post'])->name('bayar_post');
             Route::post('/edit', [App\Http\Controllers\Dashboards\PembayaranController::class, 'edit'])->name('edit');
@@ -66,3 +70,4 @@ Route::group(['middleware' => 'isLogin'], function () {
         });
     });
 });
+Route::post('/callback', [App\Http\Controllers\Dashboards\PembayaranController::class, 'callback'])->middleware('guest')->name('callback');
