@@ -99,6 +99,9 @@
     <script src="{{ asset('plugins/bootstrap-switch/js/bootstrap-switch.min.js') }}"></script>
     <!-- Summernote -->
     <script src="{{ asset('plugins/summernote/summernote-bs4.min.js') }}"></script>
+    <!-- accounting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/accounting.js/0.4.1/accounting.min.js"></script>
+
 
     <script>
         $('.select2').select2({
@@ -115,6 +118,23 @@
                 ['para', ['ul', 'ol', 'paragraph']]
             ]
         })
+
+        function copyToClipboard(elementId) {
+            console.log('copy')
+            var textToCopy = document.getElementById(elementId).textContent;
+            var temp = document.createElement("textarea");
+            temp.value = textToCopy;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand("copy");
+            document.body.removeChild(temp);
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: 'Link sudah disalin ke clipboard',
+            })
+        }
     </script>
 
     @yield('js')

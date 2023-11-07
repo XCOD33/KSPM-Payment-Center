@@ -36,6 +36,11 @@ class Pembayaran extends Model
         return $this->hasMany(RolePembayaran::class);
     }
 
+    public function pembayaran_users()
+    {
+        return $this->hasMany(PembayaranUser::class);
+    }
+
     public function getBuktiPembayaranPathAttribute($value)
     {
         return asset('storage/pembayaran' . $value);

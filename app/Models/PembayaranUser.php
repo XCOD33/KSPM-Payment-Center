@@ -21,6 +21,15 @@ class PembayaranUser extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            $model->invoice_id = 'INV-' . bin2hex(random_bytes(3));
+        });
     }
 }

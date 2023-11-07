@@ -56,11 +56,20 @@
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
-                        <li class="nav-item {{ Request::routeIs('pembayaran.*') ? 'menu-open' : '' }}">
-                            <a href="{{ route('pembayaran.index') }}"
-                                class="nav-link {{ Request::routeIs('pembayaran.index') ? 'active' : '' }}">
+                        @role('super-admin')
+                            <li class="nav-item {{ Request::routeIs('pembayaran.*') ? 'menu-open' : '' }}">
+                                <a href="{{ route('pembayaran.index') }}"
+                                    class="nav-link {{ Request::routeIs('pembayaran.index') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Daftar Pembayaran</p>
+                                </a>
+                            </li>
+                        @endrole
+                        <li class="nav-item {{ Request::routeIs('pembayaranku.*') ? 'menu-open' : '' }}">
+                            <a href="{{ route('pembayaranku.index') }}"
+                                class="nav-link {{ Request::routeIs('pembayaranku.index') ? 'active' : '' }}">
                                 <i class="far fa-circle nav-icon"></i>
-                                <p>Daftar Pembayaran</p>
+                                <p>Pembayaranku</p>
                             </a>
                         </li>
                     </ul>

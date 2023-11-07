@@ -58,6 +58,9 @@ class PembayaranController extends Controller
             ->addColumn('expired_at', function ($q) {
                 return $q->expired_at == null ? '-' : Carbon::createFromFormat('Y-m-d H:i:s', $q->expired_at)->format('d-M-Y H:i');
             })
+            ->addColumn('url', function ($q) {
+                return url('/dashboard/pembayaran/' . $q->url);
+            })
             ->toJson();
 
         return $data;
@@ -118,7 +121,16 @@ class PembayaranController extends Controller
 
     public function bayar($id)
     {
-        $rolePembayaran = RolePembayaran::with('pembayaran')->where('role_id', auth()->user()->roles->pluck('id')->first())->where('pembayaran_id', Pembayaran::where('url', $id)->first()->id)->firstOrFail();
+        $rolePembayaran = RolePembayaran::with('pembayaran')->where('role_id', auth()->user()->roles->pluck('id')->first())->where('pembayaran_id', Pembayaran::where('url', $id)->first()->id)->first();
+
+        if (empty($rolePembayaran)) {
+            if (auth()->user()->roles->pluck('name')->first() == 'super-admin') {
+                $rolePembayaran = RolePembayaran::with('pembayaran')->where('pembayaran_id', Pembayaran::where('url', $id)->first()->id)->first();
+            } else {
+                return \abort(403, 'Anda tidak memiliki akses ke pembayaran ini');
+            }
+        }
+
         $pembayaran = $rolePembayaran->pembayaran;
 
         if ($pembayaran->status == 'inactive' || now() > $pembayaran->expired_at) {
@@ -179,12 +191,21 @@ class PembayaranController extends Controller
             'signature' => Signature::generate($merchantRef . $pembayaran->nominal),
         ];
 
-        PembayaranUser::create([
-            'pembayaran_id' => $pembayaran->id,
-            'user_id' => auth()->user()->id,
-            'status' => 'UNPAID',
-            'uuid' => $merchantRef,
-        ]);
+        $pembayaranUser = PembayaranUser::where('pembayaran_id', $pembayaran->id)->where('user_id', auth()->user()->id)->first();
+        if ($pembayaranUser == null) {
+            PembayaranUser::create([
+                'pembayaran_id' => $pembayaran->id,
+                'user_id' => auth()->user()->id,
+                'status' => 'UNPAID',
+                'subtotal' => $pembayaran->nominal,
+                'uuid' => $merchantRef,
+            ]);
+        } else {
+            $pembayaranUser->update([
+                'uuid' => $merchantRef,
+            ]);
+        }
+
 
         $tripay = new Tripay(new HttpClient(config('app.tripay_api_key')));
         $res = $tripay->createTransaction($data, Tripay::CLOSE_TRANSACTION)->getResponse();
@@ -242,7 +263,7 @@ class PembayaranController extends Controller
 
             switch ($status) {
                 case 'PAID':
-                    $invoice->update(['status' => 'PAID']);
+                    $invoice->update(['status' => 'PAID', 'payment_method' => $data->payment_method, 'payment_method_code' => $data->payment_method_code, 'total_fee' => $data->total_fee, 'total' => $data->total_amount]);
                     break;
 
                 case 'EXPIRED':

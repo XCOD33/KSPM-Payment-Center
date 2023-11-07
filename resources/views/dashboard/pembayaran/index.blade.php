@@ -161,7 +161,7 @@
     {{-- modal edit --}}
     <div class="modal fade" id="editModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
         aria-labelledby="editModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-dialog modal-dialog-scrollable modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editModalLabel">Modal title</h5>
@@ -339,7 +339,8 @@
                             return `
                                 <div class="btn-group">
                                     <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#detailModal" onclick="showDetail('${row.uuid}')"><i class="fas fa-eye"></i></button>
-                                    <a href="pembayaran/${row.url}" target="_blank" class="btn btn-sm btn-info"><i class="fas fa-link"></i></a>
+                                    <p hidden id="url_${row.id}">${row.url}</p>
+                                    <button class="btn btn-sm btn-info"><i class="fas fa-link" onclick="copyToClipboard('url_${row.id}')"></i></button>
                                     <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#editModal" onclick="showEdit('${row.uuid}')"><i class="fas fa-edit"></i></button>
                                     <button class="btn btn-sm btn-danger" onclick="showDelete('${row.uuid}')"><i class="fas fa-trash-alt"></i></button>
                                 </div>
