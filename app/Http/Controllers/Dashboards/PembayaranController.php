@@ -69,30 +69,39 @@ class PembayaranController extends Controller
     public function get_pembayaran_user(Request $request)
     {
         $rolePembayaran = Pembayaran::with('role_pembayarans')->where('uuid', $request->uuid)->first()->role_pembayarans->pluck('role_id');
-        $user = User::with('roles')->get()->filter(function ($value, $key) use ($rolePembayaran) {
-            return $value->roles->whereIn('id', $rolePembayaran)->count() > 0;
-        });
+        $pembayaran = Pembayaran::where('uuid', $request->uuid)->first();
+        $users = User::with(['roles'])
+            ->whereHas('roles', function ($query) use ($rolePembayaran) {
+                $query->whereIn('id', $rolePembayaran);
+            })
+            ->get();
 
-        $data = DataTables::of($user)
+
+
+        $data = DataTables::of($users)
             ->addIndexColumn()
             ->addColumn('position', function ($user) {
                 return $user->position->name;
             })
-            ->addColumn('created_at', function ($user) {
-                return $user->pembayaran_users->first() == null ? '-' : $user->pembayaran_users->first()->created_at->format('d-M-Y H:i');
+            ->addColumn('created_at', function ($user) use ($pembayaran) {
+                return $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null ? '-' : $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->created_at->format('d-M-Y H:i');
             })
-            ->addColumn('merchant_ref', function ($user) {
-                if ($user->pembayaran_users->first() == null) {
+            ->addColumn('merchant_ref', function ($user) use ($pembayaran) {
+                return $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null ? '-' : $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->uuid;
+            })
+            ->addColumn('status', function ($user) use ($pembayaran) {
+                if ($user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null) {
                     return '-';
                 } else {
-                    return $user->pembayaran_users->first()->uuid;
-                }
-            })
-            ->addColumn('status', function ($user) {
-                if ($user->pembayaran_users->first() == null) {
-                    return '-';
-                } else {
-                    return $user->pembayaran_users->first()->status;
+                    if ($user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->status == 'UNPAID') {
+                        return 'Belum Bayar';
+                    } else if ($user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->status == 'PAID') {
+                        return 'Sudah Bayar';
+                    } else if ($user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->status == 'EXPIRED') {
+                        return 'Kadaluarsa';
+                    } else if ($user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->status == 'FAILED') {
+                        return 'Gagal';
+                    }
                 }
             })
             ->addColumn('roles', function ($user) {
@@ -100,7 +109,35 @@ class PembayaranController extends Controller
                 foreach ($user->roles as $role) {
                     $roles .= $role->name . ', ';
                 }
-                return rtrim($roles, ', ');
+                return strtoupper(rtrim($roles, ', '));
+            })
+            ->addColumn('payment_method', function ($user) use ($pembayaran) {
+                if ($user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null || $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->payment_method == null) {
+                    return '-';
+                } else {
+                    return $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->payment_method;
+                }
+            })
+            ->addColumn('total_fee', function ($user) use ($pembayaran) {
+                if ($user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null || $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->total_fee == null) {
+                    return 0;
+                } else {
+                    return $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->total_fee;
+                }
+            })
+            ->addColumn('subtotal', function ($user) use ($pembayaran) {
+                if ($user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null || $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->subtotal == null) {
+                    return 0;
+                } else {
+                    return $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->subtotal;
+                }
+            })
+            ->addColumn('total', function ($user) use ($pembayaran) {
+                if ($user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null || $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->total == null) {
+                    return 0;
+                } else {
+                    return $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->total;
+                }
             })
             ->toJson();
 
@@ -425,5 +462,85 @@ class PembayaranController extends Controller
             'status' => 'success',
             'message' => 'Berhasil menghapus data pembayaran',
         ]);
+    }
+
+    public function edit_status(Request $request)
+    {
+        try {
+            $pembayaran = Pembayaran::where('uuid', $request->uuid)->first();
+            if (!$pembayaran) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Pembayaran tidak ditemukan',
+                ]);
+            }
+
+            $user = User::where('nim', $request->nim)->first();
+            if (!$user) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User tidak ditemukan',
+                ]);
+            }
+
+            $pembayaranUser = PembayaranUser::where('pembayaran_id', $pembayaran->id)->where('user_id', $user->id)->first();
+            if (!$pembayaranUser) {
+                PembayaranUser::create([
+                    'pembayaran_id' => $pembayaran->id,
+                    'user_id' => $user->id,
+                    'uuid' => Uuid::uuid4()->toString(),
+                    'payment_method' => 'MANUAL',
+                    'payment_method_code' => 'MANUAL',
+                    'total_fee' => 0,
+                    'subtotal' => $pembayaran->nominal,
+                    'total' => $pembayaran->nominal,
+                    'status' => 'PAID',
+                ]);
+            } else {
+                $pembayaranUser->update([
+                    'status' => 'PAID',
+                    'payment_method' => 'MANUAL',
+                    'payment_method_code' => 'MANUAL',
+                    'total_fee' => 0,
+                    'subtotal' => $pembayaran->nominal,
+                    'total' => $pembayaran->nominal,
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Berhasil mengubah status pembayaran',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $th->getMessage(),
+            ]);
+        }
+    }
+
+    public function detail_delete(Request $request)
+    {
+        try {
+            $pembayaranUser = PembayaranUser::where('uuid', $request->merchant_ref)->first();
+            if (!$pembayaranUser) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Pembayaran tidak ditemukan',
+                ]);
+            }
+
+            $pembayaranUser->delete();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Berhasil menghapus pembayaran',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $th->getMessage(),
+            ]);
+        }
     }
 }

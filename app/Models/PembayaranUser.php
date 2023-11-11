@@ -29,7 +29,7 @@ class PembayaranUser extends Model
         parent::boot();
 
         static::creating(function ($model) {
-            $model->invoice_id = 'INV-' . bin2hex(random_bytes(3));
+            $model->invoice_id = 'INV-' . strtoupper(bin2hex(random_bytes(3)));
         });
     }
 }

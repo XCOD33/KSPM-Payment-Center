@@ -315,11 +315,13 @@
                     },
                     {
                         data: 'created_at',
-                        name: 'created_at'
+                        name: 'created_at',
+                        className: 'text-center'
                     },
                     {
                         data: 'expired_at',
-                        name: 'expired_at'
+                        name: 'expired_at',
+                        className: 'text-center'
                     },
                     {
                         data: 'created_by',
@@ -327,6 +329,7 @@
                     },
                     {
                         data: 'status',
+                        className: 'text-center',
                         render: function(data, type, row) {
                             return `
                                 <span class="badge badge-${row.status == 'Aktif' ? 'success' : 'danger'}">${row.status}</span>
@@ -417,19 +420,31 @@
                 success: function(res) {
                     $('#detailModalLabel').html(`Detail Pembayaran - ${res.data.name}`)
                     $('#detailModalBody').html(`
-                        <table class="table table-bordered table-hover data-table" id="detail_table">
+                        <table class="table table-bordered table-hover data-table text-sm" id="detail_table">
                             <thead>
                                 <tr class="text-center">
                                     <th>#</th>
                                     <th>Nama User</th>
                                     <th>NIM</th>
                                     <th>Roles</th>
+                                    <th>Metode Pembayaran</th>
+                                    <th>Total Fee</th>
+                                    <th>Subtotal</th>
+                                    <th>Total</th>
                                     <th>Tanggal Pembayaran</th>
-                                    <th>ID Pembayaran</th>
                                     <th>Status</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="5">Total:</th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th colspan="3"></th>
+                                </tr>
+                            </tfoot>
                         </table>
                     `)
 
@@ -451,7 +466,8 @@
                         },
                         columns: [{
                                 data: 'DT_RowIndex',
-                                name: 'DT_RowIndex'
+                                name: 'DT_RowIndex',
+                                className: 'text-center'
                             },
                             {
                                 data: 'name',
@@ -459,38 +475,112 @@
                             },
                             {
                                 data: 'nim',
-                                name: 'nim'
+                                name: 'nim',
+                                className: 'text-center'
                             },
                             {
                                 data: 'roles',
-                                name: 'roles'
+                                name: 'roles',
+                                className: 'text-center'
+                            },
+                            {
+                                data: 'payment_method',
+                                name: 'payment_method',
+                                className: 'text-center'
+                            },
+                            {
+                                data: 'total_fee',
+                                name: 'total_fee',
+                                className: 'text-center',
+                                render: function(data, type, row) {
+                                    return `
+                                        ${accounting.formatMoney(row.total_fee, 'Rp', 0, '.', ',')}
+                                    `
+                                }
+                            },
+                            {
+                                data: 'subtotal',
+                                name: 'subtotal',
+                                className: 'text-center',
+                                render: function(data, type, row) {
+                                    return `
+                                        ${accounting.formatMoney(row.subtotal, 'Rp', 0, '.', ',')}
+                                    `
+                                }
+                            },
+                            {
+                                data: 'total',
+                                name: 'total',
+                                className: 'text-center',
+                                render: function(data, type, row) {
+                                    return `
+                                        ${accounting.formatMoney(row.total, 'Rp', 0, '.', ',')}
+                                    `
+                                }
                             },
                             {
                                 data: 'created_at',
-                                name: 'created_at'
-                            },
-                            {
-                                data: 'merchant_ref',
-                                name: 'merchant_ref',
+                                name: 'created_at',
+                                className: 'text-center'
                             },
                             {
                                 data: 'status',
-                                name: 'status'
+                                name: 'status',
+                                className: 'text-center'
                             },
                             {
                                 data: 'id',
+                                className: 'text-center',
                                 render: function(data, type, row) {
-                                    return `
-                                <div class="btn-group">
-                                    <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#detailModal" onclick="showDetail('${row.uuid}')"><i class="fas fa-eye"></i></button>
-                                    <a href="pembayaran/${row.url}" target="_blank" class="btn btn-sm btn-info"><i class="fas fa-link"></i></a>
-                                    <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#editModal" onclick="showEdit('${row.uuid}')"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-sm btn-danger" onclick="showDelete('${row.uuid}')"><i class="fas fa-trash-alt"></i></button>
-                                </div>
-                            `
+                                    if (row.status != 'Sudah Bayar') {
+                                        return `
+                                            <button class="btn btn-sm btn-success" onclick="updateStatus('${uuid}', '${row.nim}')"><i class="fas fa-check"></i></button>
+                                        `
+                                    } else {
+                                        return `
+                                            <button class="btn btn-sm btn-danger" onclick="detailDelete('${uuid}', '${row.merchant_ref}')"><i class="fas fa-trash-alt"></i></button>
+                                        `
+                                    }
                                 }
                             },
-                        ]
+                        ],
+                        footerCallback: function(row, data, start, end, display) {
+                            var api = this.api(),
+                                data;
+
+                            // Menghitung total Total Fee
+                            totalFee = api.column(5, {
+                                page: 'current'
+                            }).data().reduce(function(a, b) {
+                                return a + parseFloat(b);
+                            }, 0);
+
+                            // Menghitung total Subtotal
+                            subtotal = api.column(6, {
+                                page: 'current'
+                            }).data().reduce(function(a, b) {
+                                return a + parseFloat(b);
+                            }, 0);
+
+                            // Menghitung total Total
+                            total = api.column(7, {
+                                page: 'current'
+                            }).data().reduce(function(a, b) {
+                                return a + parseFloat(b);
+                            }, 0);
+
+                            console.log("Total Fee:", totalFee);
+                            console.log("Subtotal:", subtotal);
+                            console.log("Total:", total);
+
+                            // Menambahkan total ke dalam footer
+                            $(api.column(5).footer()).html(accounting.formatMoney(totalFee, 'Rp', 0,
+                                '.', ','));
+                            $(api.column(6).footer()).html(accounting.formatMoney(subtotal, 'Rp', 0,
+                                '.', ','));
+                            $(api.column(7).footer()).html(accounting.formatMoney(total, 'Rp', 0,
+                                '.', ','));
+                        },
                     })
                 },
             })
@@ -583,6 +673,102 @@
                         success: function(res) {
                             if (res.status == 'success') {
                                 initTable()
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil',
+                                    text: res.message,
+                                })
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal',
+                                    text: res.message,
+                                })
+                            }
+                        },
+                        error: function(err) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal',
+                                text: err.message,
+                            })
+                        }
+                    })
+                }
+            })
+        }
+
+        function updateStatus(uuid = null, nim = null) {
+            Swal.fire({
+                title: 'Apakah anda yakin?',
+                text: "Anda akan mengubah status pembayaran ini menjadi 'Lunas'!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, ubah!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('pembayaran.edit_status') }}",
+                        type: "POST",
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            uuid: uuid,
+                            nim: nim
+                        },
+                        success: function(res) {
+                            if (res.status == 'success') {
+                                showDetail(uuid)
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil',
+                                    text: res.message,
+                                })
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal',
+                                    text: res.message,
+                                })
+                            }
+                        },
+                        error: function(err) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal',
+                                text: err.message,
+                            })
+                        }
+                    })
+                }
+            })
+        }
+
+        function detailDelete(uuid = null, merchant_ref = null) {
+            console.log(merchant_ref)
+            Swal.fire({
+                title: 'Apakah anda yakin?',
+                text: "Anda akan menghapus data pembayaran ini!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('pembayaran.detail_delete') }}",
+                        type: "POST",
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            merchant_ref: merchant_ref
+                        },
+                        success: function(res) {
+                            if (res.status == 'success') {
+                                showDetail(uuid)
                                 Swal.fire({
                                     icon: 'success',
                                     title: 'Berhasil',

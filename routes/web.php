@@ -67,6 +67,8 @@ Route::group(['middleware' => 'isLogin'], function () {
             Route::post('/edit', [App\Http\Controllers\Dashboards\PembayaranController::class, 'edit'])->name('edit');
             Route::post('/update', [App\Http\Controllers\Dashboards\PembayaranController::class, 'update'])->name('update');
             Route::post('/delete', [App\Http\Controllers\Dashboards\PembayaranController::class, 'delete'])->name('delete');
+            Route::post('/edit_status', [App\Http\Controllers\Dashboards\PembayaranController::class, 'edit_status'])->name('edit_status');
+            Route::post('/detail_delete', [App\Http\Controllers\Dashboards\PembayaranController::class, 'detail_delete'])->name('detail_delete');
         });
         Route::group(['prefix' => 'pembayaranku', 'as' => 'pembayaranku.'], function () {
             Route::get('/', [App\Http\Controllers\Dashboards\PembayarankuController::class, 'index'])->name('index');
