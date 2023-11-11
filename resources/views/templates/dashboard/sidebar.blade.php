@@ -106,9 +106,9 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="../charts/uplot.html" class="nav-link">
+                                <a href="{{ route('manage.position.index') }}" class="nav-link">
                                     <i class="far fa-circle nav-icon"></i>
-                                    <p>uPlot</p>
+                                    <p>Jabatan</p>
                                 </a>
                             </li>
                         </ul>

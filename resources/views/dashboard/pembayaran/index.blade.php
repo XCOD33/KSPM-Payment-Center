@@ -120,7 +120,7 @@
                             @foreach (\App\Models\User::with('position')->get() as $user)
                                 <option value="{{ $user->uuid }}"
                                     {{ $user->uuid == auth()->user()->uuid ? 'selected' : '' }}>{{ $user->name }} -
-                                    {{ $user->position->name }}</option>
+                                    {{ $user->position->name ?? '-' }}</option>
                             @endforeach
                         </select>
                     </div>

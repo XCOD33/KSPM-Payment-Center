@@ -52,6 +52,18 @@ Route::group(['middleware' => 'isLogin'], function () {
             Route::group(['prefix' => 'permission', 'as' => 'permission.'], function () {
                 Route::get('/', [App\Http\Controllers\Dashboards\PermissionController::class, 'index'])->name('index');
             });
+            Route::group(['prefix' => 'position', 'as' => 'position.'], function () {
+                Route::get('/', [App\Http\Controllers\Dashboards\PositionController::class, 'index'])->name('index');
+                Route::get('/get-position', [App\Http\Controllers\Dashboards\PositionController::class, 'get_position'])->name('get_position');
+                Route::post('/create', [App\Http\Controllers\Dashboards\PositionController::class, 'create'])->name('create');
+                Route::post('/view', [App\Http\Controllers\Dashboards\PositionController::class, 'view'])->name('view');
+                Route::post('/view-position', [App\Http\Controllers\Dashboards\PositionController::class, 'view_position'])->name('view_position');
+                Route::post('/edit', [App\Http\Controllers\Dashboards\PositionController::class, 'edit'])->name('edit');
+                Route::post('/update', [App\Http\Controllers\Dashboards\PositionController::class, 'update'])->name('update');
+                Route::post('/delete', [App\Http\Controllers\Dashboards\PositionController::class, 'delete'])->name('delete');
+                Route::post('/add-user', [App\Http\Controllers\Dashboards\PositionController::class, 'add_user'])->name('add_user');
+                Route::post('/remove-user', [App\Http\Controllers\Dashboards\PositionController::class, 'remove_user'])->name('remove_user');
+            });
             Route::get('/get-users', [App\Http\Controllers\DashboardController::class, 'get_users'])->name('get_users');
         });
         Route::group(['prefix' => 'pembayaran', 'as' => 'pembayaran.'], function () {

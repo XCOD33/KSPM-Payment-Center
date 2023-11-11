@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->char('uuid')->unique();
             $table->string('name');
-            $table->string('email')->unique();
-            $table->string('phone')->unique();
+            $table->string('email')->unique()->nullable();
+            $table->string('phone')->unique()->nullable();
             $table->string('member_id')->unique();
             $table->string('nim')->unique();
             $table->foreignId('position_id')->nullable()->constrained('positions')->onDelete('set null');
