@@ -15,11 +15,11 @@ class AuthController extends Controller
     public function login_post(Request $request)
     {
         $credentials = $request->validate([
-            'member_id' => ['required', 'min: 9', 'max: 9'],
+            'nim' => ['required', 'min: 10', 'max: 10'],
             'password' => ['required', 'min: 8', 'max: 64']
         ]);
 
-        if (!Auth::attempt(['member_id' => $credentials['member_id'], 'password' => $credentials['password']], $request->get('remember'))) {
+        if (!Auth::attempt(['nim' => $credentials['nim'], 'password' => $credentials['password']], $request->get('remember'))) {
             return back()->withError('Invalid login credentials!');
         }
 
