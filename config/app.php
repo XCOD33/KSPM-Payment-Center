@@ -173,6 +173,7 @@ return [
         Yajra\DataTables\DataTablesServiceProvider::class,
         RealRashid\SweetAlert\SweetAlertServiceProvider::class,
         Maatwebsite\Excel\ExcelServiceProvider::class,
+        Barryvdh\Debugbar\ServiceProvider::class,
     ])->toArray(),
 
     /*
@@ -191,6 +192,7 @@ return [
         'Alert' => RealRashid\SweetAlert\Facades\Alert::class,
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
         'Tripay' => App\Facades\Tripay::class,
+        'Debugbar' => Barryvdh\Debugbar\Facades\Debugbar::class,
     ])->toArray(),
 
     'tripay_api_key' => env('TRIPAY_API_KEY'),
