@@ -16,7 +16,7 @@ return new class extends Migration
             $table->char('uuid')->unique();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->enum('can_duplicate', ['yes', 'no'])->default('no');
+            // $table->enum('can_duplicate', ['yes', 'no'])->default('no');
             $table->timestamps();
             $table->softDeletes();
         });

@@ -47,8 +47,10 @@
                         </p>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link {{ Request::routeIs('pembayaran.*') ? 'active' : '' }}">
+                <li
+                    class="nav-item {{ Request::routeIs('pembayaran.*') || Request::routeIs('pembayaranku.*') ? 'menu-open' : '' }}">
+                    <a href="#"
+                        class="nav-link {{ Request::routeIs('pembayaran.*') || Request::routeIs('pembayaranku.*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-money-bill"></i>
                         <p>
                             Pembayaran

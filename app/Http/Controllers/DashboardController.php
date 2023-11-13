@@ -90,14 +90,14 @@ class DashboardController extends Controller
         ]);
 
         $user = User::where('uuid', $request->uuid)->firstOrFail();
-        $positions = Position::all();
-        if (!empty($request->positionEdit)) {
-            foreach ($positions as $position) {
-                if ($position->id == $request->positionEdit && $position->can_duplicate == 'no') {
-                    return back()->with('error', 'Posisi yang dipilih tidak dapat diubah karena posisi ' . $position->name . ' tidak boleh lebih dari satu!');
-                }
-            }
-        }
+        // $positions = Position::all();
+        // if (!empty($request->positionEdit)) {
+        //     foreach ($positions as $position) {
+        //         if ($position->id == $request->positionEdit && $position->can_duplicate == 'no') {
+        //             return back()->with('error', 'Posisi yang dipilih tidak dapat diubah karena posisi ' . $position->name . ' tidak boleh lebih dari satu!');
+        //         }
+        //     }
+        // }
 
         if (!empty($request->passwordEdit)) {
             $request->validate([

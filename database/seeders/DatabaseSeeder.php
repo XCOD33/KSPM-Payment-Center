@@ -58,10 +58,23 @@ class DatabaseSeeder extends Seeder
             'position_id' => null,
             'email' => fake()->email(),
             'phone' => '08' . fake()->numerify('##########'),
+            'nim' => '5210411055',
+            'year' => '2023'
         ]);
 
         $user->assignRole($role1);
         $user->givePermissionTo(Permission::all());
+
+        for ($i = 1; $i < 10; $i++) {
+            \App\Models\User::factory()->create([
+                'password' => bcrypt('password'),
+                'position_id' => null,
+                'email' => fake()->email(),
+                'phone' => '08' . fake()->numerify('##########'),
+                'nim' => random_int(5, 5) . fake()->numerify('#########'),
+                'year' => 20 . random_int(10, 21),
+            ]);
+        }
 
         // for ($i = 1; $i < 100; $i++) {
         //     if ($i < 10) {
