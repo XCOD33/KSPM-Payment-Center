@@ -73,6 +73,7 @@
 
                 </div>
                 <div class="modal-footer">
+                    <input type="hidden" name="uuid_pembayaran_users">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary float-right" style="margin-right: 5px;"
                         onclick="generatePdf()">
@@ -294,6 +295,7 @@
                             </div>
                         </div>
                     `)
+                    $('input[name="uuid_pembayaran_users"]').val(response.data.pembayaran_users[0].uuid)
                 },
                 error: function(err) {
                     Swal.fire({
@@ -306,10 +308,41 @@
         }
 
         function generatePdf() {
-            w = window.open();
-            w.document.write($('#invoice').html());
-            w.print();
-            w.close();
+            var uuid = $('input[name="uuid_pembayaran_users"]').val()
+            $.ajax({
+                url: "{{ url('/dashboard/pembayaranku/print-invoice') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    uuid: uuid,
+                },
+                success: function(response) {
+                    if (response.status == 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: 'PDF berhasil di generate',
+                        }).then((result) => {
+                            window.location.href =
+                                "{{ url('/dashboard/pembayaranku/view-invoice') }}/" + response
+                                .invoice_id
+                        })
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: response.message,
+                        })
+                    }
+                },
+                error: function(err) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: err.message,
+                    })
+                }
+            })
         }
     </script>
 @endsection

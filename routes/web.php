@@ -86,6 +86,8 @@ Route::group(['middleware' => 'isLogin'], function () {
             Route::get('/', [App\Http\Controllers\Dashboards\PembayarankuController::class, 'index'])->name('index');
             Route::get('/pembayarans', [App\Http\Controllers\Dashboards\PembayarankuController::class, 'pembayarans'])->name('pembayarans');
             Route::post('/invoice', [App\Http\Controllers\Dashboards\PembayarankuController::class, 'invoice'])->name('invoice');
+            Route::post('/print-invoice', [App\Http\Controllers\Dashboards\PembayarankuController::class, 'print_invoice'])->name('print_invoice');
+            Route::get('/view-invoice/{invoice_id}', [App\Http\Controllers\Dashboards\PembayarankuController::class, 'view_invoice'])->name('view_invoice');
         });
     });
 });

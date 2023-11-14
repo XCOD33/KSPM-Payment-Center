@@ -4,9 +4,13 @@ namespace App\Http\Controllers\Dashboards;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pembayaran;
+use App\Models\PembayaranUser;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
+
+use function PHPUnit\Framework\throwException;
 
 class PembayarankuController extends Controller
 {
@@ -74,5 +78,49 @@ class PembayarankuController extends Controller
                 'message' => $th->getMessage()
             ]);
         }
+    }
+
+    public function print_invoice(Request $request)
+    {
+        try {
+            $pembayaranUsers = PembayaranUser::with('user')->where('uuid', $request->uuid)->first();
+
+            if (!$pembayaranUsers) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Data tidak ditemukan'
+                ]);
+            }
+
+            if ($pembayaranUsers->user->id != auth()->user()->id) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Maaf anda tidak memiliki akses untuk data ini'
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'invoice_id' => $pembayaranUsers->invoice_id
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $th->getMessage()
+            ]);
+        }
+    }
+
+    public function view_invoice($invoice_id)
+    {
+        $pembayaranUsers = PembayaranUser::with('pembayaran')->with('user')->where('invoice_id', $invoice_id)->firstOrFail();
+
+        if ($pembayaranUsers->user->id != auth()->user()->id) {
+            abort(403, 'Maaf anda tidak memiliki akses untuk data ini');
+        }
+
+        return view('dashboard.pembayaranku.print-invoice', [
+            'data' => $pembayaranUsers
+        ]);
     }
 }
