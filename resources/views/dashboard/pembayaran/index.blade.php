@@ -438,7 +438,8 @@
                             </thead>
                             <tfoot>
                                 <tr>
-                                    <th colspan="5">Total:</th>
+                                    <th colspan="4">Total:</th>
+                                    <th></th>
                                     <th></th>
                                     <th></th>
                                     <th></th>
@@ -548,6 +549,25 @@
                             var api = this.api(),
                                 data;
 
+                            // menghitung member yang sudah membayar
+                            var dataPaid = api.column(4, {
+                                page: 'current'
+                            }).data();
+                            var result = data.reduce(function(acc, value) {
+                                if (value.merchant_ref !== '-') {
+                                    acc.totalPaid++;
+                                } else {
+                                    acc.totalNotPaid++;
+                                }
+                                return acc;
+                            }, {
+                                totalPaid: 0,
+                                totalNotPaid: 0
+                            })
+
+                            console.log(result.totalPaid);
+                            console.log(result.totalNotPaid);
+
                             // Menghitung total Total Fee
                             totalFee = api.column(5, {
                                 page: 'current'
@@ -569,11 +589,10 @@
                                 return a + parseFloat(b);
                             }, 0);
 
-                            console.log("Total Fee:", totalFee);
-                            console.log("Subtotal:", subtotal);
-                            console.log("Total:", total);
-
                             // Menambahkan total ke dalam footer
+                            $(api.column(4).footer()).html(
+                                `<span class="badge badge-success">Sudah Membayar : ${result.totalPaid}</span> <span class="badge badge-danger">Belum Membayar : ${result.totalNotPaid}</span>`
+                            );
                             $(api.column(5).footer()).html(accounting.formatMoney(totalFee, 'Rp', 0,
                                 '.', ','));
                             $(api.column(6).footer()).html(accounting.formatMoney(subtotal, 'Rp', 0,
