@@ -80,6 +80,10 @@
                 text: 'Link sudah disalin ke clipboard',
             })
         }
+
+        function changePassword() {
+            alert('hello');
+        }
     </script>
 
     @yield('js')

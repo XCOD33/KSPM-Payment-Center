@@ -141,8 +141,8 @@
                             </td>
                         </tr>
                         <tr>
-                            <td>ID Anggota</td>
-                            <td>{{ auth()->user()->member_id }}</td>
+                            <td>NIM</td>
+                            <td>{{ auth()->user()->nim }}</td>
                             </td>
                         </tr>
                         <tr>
@@ -152,10 +152,14 @@
                     </tbody>
                 </table>
             </div>
-            <form action="{{ route('logout') }}" class="modal-footer" method="POST">
-                @csrf
-                <button type="submit" class="btn btn-primary btn-block">Logout</button>
-            </form>
+            <div class="modal-footer">
+                <button class="btn btn-warning btn-sm" onclick="changePassword()">Change Password</button>
+
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="btn btn-danger btn-sm">Logout</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
