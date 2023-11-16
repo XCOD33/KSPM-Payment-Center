@@ -12,6 +12,7 @@ use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Response;
 use Nekoding\Tripay\Networks\HttpClient;
 use Nekoding\Tripay\Signature;
@@ -308,6 +309,27 @@ class PembayaranController extends Controller
             switch ($status) {
                 case 'PAID':
                     $invoice->update(['status' => 'PAID', 'payment_method' => $data->payment_method, 'payment_method_code' => $data->payment_method_code, 'total_fee' => $data->total_fee, 'total' => $data->total_amount]);
+
+                    $response = Http::withHeaders([
+                        'Authorization' => env('FONNTE')
+                    ])->post('https://api.fonnte.com/send', [
+                        'target' => $invoice->user->phone,
+                        'message' => "Halo " . $invoice->user->name . ",\n\nSalam sejahtera. Kami ingin memberitahukan bahwa pembayaran untuk *" . $invoice->pembayaran->name . "* telah kami terima.\n\nBerikut adalah rincian pembayaran:\n\n- Jumlah Pembayaran : Rp" . number_format($invoice->subtotal, 0, ',', '.') . "\n- Nomor Invoice : " . $invoice->invoice_id . "\n- Biaya Admin : Rp" . number_format($invoice->total_fee, 0, ',', '.') . "\n- Total Pembayaran : Rp" . number_format($invoice->total, 0, ',', '.') . "\n- Cetak Bukti Pembayaran : " . url('dashboard/pembayaranku/view-invoice', $invoice->invoice_id) . "\n\nTerima kasih telah melakukan pembayaran. Semoga harimu menyenangkan.\n\nHormat Kami,\nTim Bendahara KSPM UTY",
+                    ]);
+                    if ($response->successful()) {
+                        $response = $response->json();
+                        if ($response['status'] == false) {
+                            return Response::json([
+                                'success' => false,
+                                'message' => 'Gagal mengirim SMS',
+                            ]);
+                        };
+                    } else {
+                        return Response::json([
+                            'success' => false,
+                            'message' => 'Gagal mengirim SMS',
+                        ]);
+                    }
                     break;
 
                 case 'EXPIRED':
@@ -492,7 +514,7 @@ class PembayaranController extends Controller
 
             $pembayaranUser = PembayaranUser::where('pembayaran_id', $pembayaran->id)->where('user_id', $user->id)->first();
             if (!$pembayaranUser) {
-                PembayaranUser::create([
+                $pembayaranUser = PembayaranUser::create([
                     'pembayaran_id' => $pembayaran->id,
                     'user_id' => $user->id,
                     'uuid' => Uuid::uuid4()->toString(),
@@ -511,6 +533,27 @@ class PembayaranController extends Controller
                     'total_fee' => 0,
                     'subtotal' => $pembayaran->nominal,
                     'total' => $pembayaran->nominal,
+                ]);
+            }
+
+            $response = Http::withHeaders([
+                'Authorization' => env('FONNTE')
+            ])->post('https://api.fonnte.com/send', [
+                'target' => $pembayaranUser->user->phone,
+                'message' => "Halo " . $pembayaranUser->user->name . ",\n\nSalam sejahtera. Kami ingin memberitahukan bahwa pembayaran untuk *" . $pembayaranUser->pembayaran->name . "* telah kami terima.\n\nBerikut adalah rincian pembayaran:\n\n- Jumlah Pembayaran : Rp" . number_format($pembayaranUser->subtotal, 0, ',', '.') . "\n- Nomor Invoice : " . $pembayaranUser->invoice_id . "\n- Biaya Admin : Rp" . number_format($pembayaranUser->total_fee, 0, ',', '.') . "\n- Total Pembayaran : Rp" . number_format($pembayaranUser->total, 0, ',', '.') . "\n- Cetak Bukti Pembayaran : " . url('dashboard/pembayaranku/view-invoice', $pembayaranUser->invoice_id) . "\n\nTerima kasih telah melakukan pembayaran. Semoga harimu menyenangkan.\n\nHormat Kami,\nTim Bendahara KSPM UTY",
+            ]);
+            if ($response->successful()) {
+                $response = $response->json();
+                if ($response['status'] == false) {
+                    return Response::json([
+                        'success' => false,
+                        'message' => 'Gagal mengirim SMS',
+                    ]);
+                };
+            } else {
+                return Response::json([
+                    'success' => false,
+                    'message' => 'Gagal mengirim SMS',
                 ]);
             }
 

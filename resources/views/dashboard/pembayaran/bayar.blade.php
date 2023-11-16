@@ -61,7 +61,7 @@
                                             <p>Terima kasih telah melakukan pembayaran. Pembayaran anda telah kami
                                                 terima.</p>
                                             <hr>
-                                            <p class="mb-0">Silahkan cek email anda untuk mendapatkan bukti
+                                            <p class="mb-0">Silahkan cek WhatsApp anda untuk mendapatkan bukti
                                                 pembayaran.</p>
                                         </div>
                                     </div>
