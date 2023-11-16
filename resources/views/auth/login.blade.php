@@ -11,7 +11,7 @@
         <!-- /.login-logo -->
         <div class="card card-outline card-primary">
             <div class="card-header text-center">
-                <h1><b>Admin</b>LTE</h1>
+                <h1><b>KSPM</b> UTY</h1>
             </div>
             <div class="card-body">
                 <p class="login-box-msg">Masuk untuk memulai sesi Anda</p>
