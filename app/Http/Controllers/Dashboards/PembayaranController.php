@@ -80,6 +80,9 @@ class PembayaranController extends Controller
 
             $data = DataTables::of($users)
                 ->addIndexColumn()
+                ->addColumn('position', function ($user) {
+                    return $user->position == null ? '-' : $user->position->name;
+                })
                 ->addColumn('created_at', function ($user) use ($pembayaran) {
                     return $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null ? '-' : $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->created_at->format('d-M-Y H:i');
                 })

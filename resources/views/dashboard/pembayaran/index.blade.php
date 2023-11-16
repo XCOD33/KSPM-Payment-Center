@@ -426,6 +426,7 @@
                                     <th>#</th>
                                     <th>Nama User</th>
                                     <th>NIM</th>
+                                    <th>Jabatan</th>
                                     <th>Roles</th>
                                     <th>Metode Pembayaran</th>
                                     <th>Total Fee</th>
@@ -438,12 +439,12 @@
                             </thead>
                             <tfoot>
                                 <tr>
-                                    <th colspan="4">Total:</th>
-                                    <th></th>
-                                    <th></th>
-                                    <th></th>
-                                    <th></th>
-                                    <th colspan="3"></th>
+                                    <th colspan="5" class="align-middle">Total:</th>
+                                    <th class="align-middle"></th>
+                                    <th class="align-middle"></th>
+                                    <th class="align-middle"></th>
+                                    <th class="align-middle"></th>
+                                    <th colspan="3" class="align-middle"></th>
                                 </tr>
                             </tfoot>
                         </table>
@@ -477,6 +478,11 @@
                             {
                                 data: 'nim',
                                 name: 'nim',
+                                className: 'text-center'
+                            },
+                            {
+                                data: 'position',
+                                name: 'position',
                                 className: 'text-center'
                             },
                             {
@@ -550,7 +556,7 @@
                                 data;
 
                             // menghitung member yang sudah membayar
-                            var dataPaid = api.column(4, {
+                            var dataPaid = api.column(5, {
                                 page: 'current'
                             }).data();
                             var result = data.reduce(function(acc, value) {
@@ -569,35 +575,35 @@
                             console.log(result.totalNotPaid);
 
                             // Menghitung total Total Fee
-                            totalFee = api.column(5, {
+                            totalFee = api.column(6, {
                                 page: 'current'
                             }).data().reduce(function(a, b) {
                                 return a + parseFloat(b);
                             }, 0);
 
                             // Menghitung total Subtotal
-                            subtotal = api.column(6, {
+                            subtotal = api.column(7, {
                                 page: 'current'
                             }).data().reduce(function(a, b) {
                                 return a + parseFloat(b);
                             }, 0);
 
                             // Menghitung total Total
-                            total = api.column(7, {
+                            total = api.column(8, {
                                 page: 'current'
                             }).data().reduce(function(a, b) {
                                 return a + parseFloat(b);
                             }, 0);
 
                             // Menambahkan total ke dalam footer
-                            $(api.column(4).footer()).html(
+                            $(api.column(5).footer()).html(
                                 `<span class="badge badge-success">Sudah Membayar : ${result.totalPaid}</span> <span class="badge badge-danger">Belum Membayar : ${result.totalNotPaid}</span>`
                             );
-                            $(api.column(5).footer()).html(accounting.formatMoney(totalFee, 'Rp', 0,
+                            $(api.column(6).footer()).html(accounting.formatMoney(totalFee, 'Rp', 0,
                                 '.', ','));
-                            $(api.column(6).footer()).html(accounting.formatMoney(subtotal, 'Rp', 0,
+                            $(api.column(7).footer()).html(accounting.formatMoney(subtotal, 'Rp', 0,
                                 '.', ','));
-                            $(api.column(7).footer()).html(accounting.formatMoney(total, 'Rp', 0,
+                            $(api.column(8).footer()).html(accounting.formatMoney(total, 'Rp', 0,
                                 '.', ','));
                         },
                     })
