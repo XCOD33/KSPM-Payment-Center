@@ -383,7 +383,7 @@ class PembayaranController extends Controller
             $response = Http::withHeaders([
                 'Authorization' => env('FONNTE')
             ])->post('https://api.fonnte.com/send', [
-                'target' => Role::where('id', $request->roles)->first()->name == 'pengurus' ? '120363199871582448@g.us' : '120363200691183603@g.us',
+                'target' => Role::where('id', $request->roles)->first()->name == 'pengurus' ? env('GROUP_PENGURUS') : env('GROUP_MAGANG'),
                 'message' => "*Pengumuman Pembayaran*\n\nHalo semua,\n\nKami senang memberitahu kalian bahwa link pembayaran untuk *" . $pembayaran->name . "* sudah tersedia! Berikut adalah detail pembayaran : \n\n- Link Pembayaran : " . url('/dashboard/pembayaran', $pembayaran->url) . "\n- Jumlah Pembayaran : Rp" . number_format($pembayaran->nominal, 0, ',', '.') . "\n- Batas Pembayaran : " . Carbon::parse($pembayaran->expired_at)->format('d-m-Y H:i') . "\n\nMohon segera melakukan pembayaran sebelum melewati batas tanggal akhir pembayaran. Jika kalian memiliki pertanyaan atau memerlukan bantuan, jangan ragu untuk menghubungi kami.\n\nTerima kasih atas kerjasamanya!"
             ]);
             if ($response->successful()) {
@@ -484,6 +484,29 @@ class PembayaranController extends Controller
             RolePembayaran::where('pembayaran_id', $pembayaran->id)
                 ->whereIn('role_id', $rolesToDelete)
                 ->delete();
+
+            if ($pembayaran->status == 'active') {
+                $response = Http::withHeaders([
+                    'Authorization' => env('FONNTE')
+                ])->post('https://api.fonnte.com/send', [
+                    'target' => Role::where('id', $request->roles)->first()->name == 'pengurus' ? env('GROUP_PENGURUS') : env('GROUP_MAGANG'),
+                    'message' => "*Pengumuman Pembayaran*\n\nHalo semua,\n\nKami senang memberitahu kalian bahwa link pembayaran untuk *" . $pembayaran->name . "* sudah tersedia dan telah *diperbaharui*! *Cek perubahan yang baru agar tidak terjadi kesalahan pembayaran!* Berikut adalah detail pembayaran : \n\n- Link Pembayaran : " . url('/dashboard/pembayaran', $pembayaran->url) . "\n- Jumlah Pembayaran : Rp" . number_format($pembayaran->nominal, 0, ',', '.') . "\n- Batas Pembayaran : " . Carbon::parse($pembayaran->expired_at)->format('d-m-Y H:i') . "\n\nMohon segera melakukan pembayaran sebelum melewati batas tanggal akhir pembayaran. Jika kalian memiliki pertanyaan atau memerlukan bantuan, jangan ragu untuk menghubungi kami.\n\nTerima kasih atas kerjasamanya!"
+                ]);
+                if ($response->successful()) {
+                    $response = $response->json();
+                    if ($response['status'] == false) {
+                        return Response::json([
+                            'success' => false,
+                            'message' => 'Gagal mengirim SMS',
+                        ]);
+                    };
+                } else {
+                    return Response::json([
+                        'success' => false,
+                        'message' => 'Gagal mengirim SMS',
+                    ]);
+                }
+            }
 
             return response()->json([
                 'status' => 'success',
