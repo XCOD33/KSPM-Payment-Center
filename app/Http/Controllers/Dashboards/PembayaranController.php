@@ -549,4 +549,13 @@ class PembayaranController extends Controller
             ]);
         }
     }
+
+    public function print(Request $request)
+    {
+        $pembayaran = Pembayaran::where('uuid', $request->uuid_print)->firstOrFail();
+
+        return view('dashboard.pembayaran.print-pembayaran-user', [
+            'pembayaran' => $pembayaran,
+        ]);
+    }
 }

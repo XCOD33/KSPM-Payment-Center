@@ -78,6 +78,13 @@
 
                     </div>
                 </div>
+                <form class="modal-footer" method="POST" action="{{ route('pembayaran.print') }}">
+                    @csrf
+                    <input type="hidden" name="uuid_print">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fas fa-download"></i> <span class="ml-2">Rekapan Pembayaran</span>
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -418,6 +425,7 @@
                     uuid: uuid
                 },
                 success: function(res) {
+                    $('input[name=uuid_print]').val(uuid)
                     $('#detailModalLabel').html(`Detail Pembayaran - ${res.data.name}`)
                     $('#detailModalBody').html(`
                         <table class="table table-bordered table-hover data-table text-sm" id="detail_table">
