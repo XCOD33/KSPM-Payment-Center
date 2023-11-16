@@ -29,12 +29,14 @@ class DashboardController extends Controller
         $total_active_bill = 0;
         $total_paid_bill = 0;
         foreach ($pembayarans as $pembayaran) {
-            if ($pembayaran->pembayaran_users->count() == 0) {
-                $active_bill++;
-                $total_active_bill += $pembayaran->nominal;
-            } else {
-                $paid_bill++;
-                $total_paid_bill += $pembayaran->nominal;
+            if ($pembayaran->role_pembayarans->count() != 0) {
+                if ($pembayaran->pembayaran_users->count() == 0) {
+                    $active_bill++;
+                    $total_active_bill += $pembayaran->nominal;
+                } else {
+                    $paid_bill++;
+                    $total_paid_bill += $pembayaran->nominal;
+                }
             }
         }
 
