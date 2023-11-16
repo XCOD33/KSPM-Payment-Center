@@ -562,6 +562,9 @@ class PembayaranController extends Controller
                 })
                 ->get();
 
+            $sum_total_fee = 0;
+            $sum_subtotal = 0;
+            $sum_total = 0;
             foreach ($users as $user) {
                 $user->position = $user->position == null ? '-' : $user->position->name;
 
@@ -578,11 +581,21 @@ class PembayaranController extends Controller
                 $user->subtotal = $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null || $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->subtotal == null ? 0 : $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->subtotal;
 
                 $user->total = $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null || $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->total == null ? 0 : $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->total;
+
+                $sum_subtotal += $user->subtotal;
+                $sum_total_fee += $user->total_fee;
+                $sum_total += $user->total;
             }
+
+            $sum = [];
+            $sum['total_fee'] = $sum_total_fee;
+            $sum['subtotal'] = $sum_subtotal;
+            $sum['total'] = $sum_total;
 
             return view('dashboard.pembayaran.print-pembayaran-user', [
                 'pembayaran' => $pembayaran,
                 'datas' => $users,
+                'sum' => $sum,
             ]);
         } catch (\Throwable $th) {
             return $th->getMessage();

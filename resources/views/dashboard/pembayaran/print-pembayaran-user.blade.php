@@ -67,6 +67,15 @@
                     </tr>
                 @endforeach
             </tbody>
+            <tfoot>
+                <tr class="text-center">
+                    <th colspan="5">Total</th>
+                    <th>Rp{{ number_format($sum['total_fee'], 0, ',', '.') }}</th>
+                    <th>Rp{{ number_format($sum['subtotal'], 0, ',', '.') }}</th>
+                    <th>Rp{{ number_format($sum['total'], 0, ',', '.') }}</th>
+                    <th colspan="2"></th>
+                </tr>
+            </tfoot>
         </table>
 
         <p class="text-right">Tanggal Print : {{ now()->format('d-M-Y H:i') }}</p>
