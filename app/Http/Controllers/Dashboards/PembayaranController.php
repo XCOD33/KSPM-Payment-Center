@@ -9,6 +9,7 @@ use App\Models\Position;
 use App\Models\PositionPembayaran;
 use App\Models\RolePembayaran;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
@@ -552,10 +553,39 @@ class PembayaranController extends Controller
 
     public function print(Request $request)
     {
-        $pembayaran = Pembayaran::where('uuid', $request->uuid_print)->firstOrFail();
+        try {
+            $rolePembayaran = Pembayaran::with('role_pembayarans')->where('uuid', $request->uuid_print)->first()->role_pembayarans->pluck('role_id');
+            $pembayaran = Pembayaran::where('uuid', $request->uuid_print)->first();
+            $users = User::with(['roles'])
+                ->whereHas('roles', function ($query) use ($rolePembayaran) {
+                    $query->whereIn('id', $rolePembayaran);
+                })
+                ->get();
 
-        return view('dashboard.pembayaran.print-pembayaran-user', [
-            'pembayaran' => $pembayaran,
-        ]);
+            foreach ($users as $user) {
+                $user->position = $user->position == null ? '-' : $user->position->name;
+
+                $user->merchant_ref = $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null ? '-' : $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->uuid;
+
+                $user->status = $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null ? '-' : $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->status;
+
+                $user->payment_method = $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null || $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->payment_method == null ? '-' : $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->payment_method;
+
+                $user->created_at = $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null ? null : $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->created_at->format('d-M-Y H:i');
+
+                $user->total_fee = $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null || $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->total_fee == null ? 0 : $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->total_fee;
+
+                $user->subtotal = $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null || $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->subtotal == null ? 0 : $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->subtotal;
+
+                $user->total = $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null || $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->total == null ? 0 : $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->total;
+            }
+
+            return view('dashboard.pembayaran.print-pembayaran-user', [
+                'pembayaran' => $pembayaran,
+                'datas' => $users,
+            ]);
+        } catch (\Throwable $th) {
+            return $th->getMessage();
+        }
     }
 }

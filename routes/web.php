@@ -74,6 +74,7 @@ Route::group(['middleware' => 'isLogin'], function () {
             Route::post('/store', [App\Http\Controllers\Dashboards\PembayaranController::class, 'store'])->name('store');
             Route::post('/view', [App\Http\Controllers\Dashboards\PembayaranController::class, 'view'])->name('view');
             Route::get('/channel', [App\Http\Controllers\Dashboards\PembayaranController::class, 'channel'])->name('channel');
+            Route::post('/print', [App\Http\Controllers\Dashboards\PembayaranController::class, 'print'])->name('print');
             Route::get('/{id}', [App\Http\Controllers\Dashboards\PembayaranController::class, 'bayar'])->name('bayar');
             Route::post('/bayar', [App\Http\Controllers\Dashboards\PembayaranController::class, 'bayar_post'])->name('bayar_post');
             Route::post('/edit', [App\Http\Controllers\Dashboards\PembayaranController::class, 'edit'])->name('edit');
@@ -81,7 +82,6 @@ Route::group(['middleware' => 'isLogin'], function () {
             Route::post('/delete', [App\Http\Controllers\Dashboards\PembayaranController::class, 'delete'])->name('delete');
             Route::post('/edit_status', [App\Http\Controllers\Dashboards\PembayaranController::class, 'edit_status'])->name('edit_status');
             Route::post('/detail_delete', [App\Http\Controllers\Dashboards\PembayaranController::class, 'detail_delete'])->name('detail_delete');
-            Route::post('/print', [App\Http\Controllers\Dashboards\PembayaranController::class, 'print'])->name('print');
         });
         Route::group(['prefix' => 'pembayaranku', 'as' => 'pembayaranku.'], function () {
             Route::get('/', [App\Http\Controllers\Dashboards\PembayarankuController::class, 'index'])->name('index');

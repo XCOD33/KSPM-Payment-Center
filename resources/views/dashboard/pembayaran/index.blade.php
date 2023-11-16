@@ -826,5 +826,40 @@
                 }
             })
         }
+
+        function print_rekap() {
+            var uuid = $('input[name=uuid_print]').val()
+            console.log(uuid)
+            $.ajax({
+                url: "{{ route('pembayaran.print') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    uuid: uuid
+                },
+                success: function(res) {
+                    if (res.status == 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: res.message,
+                        })
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: res.message,
+                        })
+                    }
+                },
+                error: function(err) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: err.message,
+                    })
+                }
+            })
+        }
     </script>
 @endsection
