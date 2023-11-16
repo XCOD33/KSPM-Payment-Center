@@ -74,10 +74,10 @@ class User extends Authenticatable
         return $this->hasMany(Pembayaran::class);
     }
 
-    public function position_pembayarans()
-    {
-        return $this->hasMany(PositionPembayaran::class);
-    }
+    // public function role_pembayarans()
+    // {
+    //     return $this->hasMany(RolePembayaran::class);
+    // }
 
     public function pembayaran_users()
     {

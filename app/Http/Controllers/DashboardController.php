@@ -10,13 +10,40 @@ use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\UsersImport;
+use App\Models\Pembayaran;
+use App\Models\PembayaranUser;
 use App\Models\Position;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        return view('dashboard.index');
+        $pembayarans = Pembayaran::with(['role_pembayarans' => function ($query) {
+            $query->where('role_id', auth()->user()->roles->pluck('id')->first());
+        }])->with(['pembayaran_users' => function ($query) {
+            $query->where('user_id', auth()->user()->id)->where('status', 'PAID');
+        }])->get();
+
+        $active_bill = 0;
+        $paid_bill = 0;
+        $total_active_bill = 0;
+        $total_paid_bill = 0;
+        foreach ($pembayarans as $pembayaran) {
+            if ($pembayaran->pembayaran_users->count() == 0) {
+                $active_bill++;
+                $total_active_bill += $pembayaran->nominal;
+            } else {
+                $paid_bill++;
+                $total_paid_bill += $pembayaran->nominal;
+            }
+        }
+
+        return view('dashboard.index', [
+            'active_bill' => $active_bill,
+            'paid_bill' => $paid_bill,
+            'total_active_bill' => $total_active_bill,
+            'total_paid_bill' => $total_paid_bill,
+        ]);
     }
 
     public function manage_users_get()
