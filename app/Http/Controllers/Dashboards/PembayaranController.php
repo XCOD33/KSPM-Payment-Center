@@ -201,7 +201,7 @@ class PembayaranController extends Controller
 
     public function channel()
     {
-        $tripay = new Tripay(new HttpClient(config('app.tripay_api_key')));
+        $tripay = new Tripay(new HttpClient(env('TRIPAY_API_KEY')));
         $res = $tripay->getChannelPembayaran();
 
         return response()->json([
@@ -261,7 +261,7 @@ class PembayaranController extends Controller
         }
 
 
-        $tripay = new Tripay(new HttpClient(config('app.tripay_api_key')));
+        $tripay = new Tripay(new HttpClient(env('TRIPAY_API_KEY')));
         $res = $tripay->createTransaction($data, Tripay::CLOSE_TRANSACTION)->getResponse();
 
         return response()->json([
@@ -275,7 +275,7 @@ class PembayaranController extends Controller
     {
         $callbackSignature = $request->server('HTTP_X_CALLBACK_SIGNATURE');
         $json = $request->getContent();
-        $signature = hash_hmac('sha256', $json, config('app.tripay_private_key'));
+        $signature = hash_hmac('sha256', $json, env('TRIPAY_PRIVATE_KEY'));
 
         if ($signature !== (string) $callbackSignature) {
             return Response::json([
