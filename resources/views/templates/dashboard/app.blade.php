@@ -22,6 +22,15 @@
         @endphp
     @endif
 
+    @if (session()->has('warning'))
+        @php
+            alert()
+                ->warning('Warning', session()->get('warning'))
+                ->persistent(true, false)
+                ->toToast();
+        @endphp
+    @endif
+
     @if ($errors->any())
         @php
             alert()->html('Error', implode('<br>', $errors->all()), 'error');
