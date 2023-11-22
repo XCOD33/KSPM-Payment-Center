@@ -21,7 +21,7 @@
 
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col-8">
+                    <div class="col-md-8">
                         <!-- Default box -->
                         <div class="card card-outline card-primary">
                             <div class="card-header">
@@ -45,7 +45,7 @@
                         </div>
                         <!-- /.card -->
                     </div>
-                    <div class="col-4">
+                    <div class="col-md-4">
                         <div class="card card-outline card-primary">
                             <div class="card-header">
                                 <h3 class="card-title">Buat Jabatan Baru</h3>
@@ -68,7 +68,7 @@
     </div>
 
     {{-- modal view --}}
-    <div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+    <div class="modal fade" id="viewModal" aria-labelledby="viewModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
@@ -78,7 +78,7 @@
                     </button>
                 </div>
                 <div class="modal-body row">
-                    <div class="col-8">
+                    <div class="col-md-8">
                         <div class="card card-outline card-primary">
                             <div class="card-header">
                                 <h3 class="card-title">
@@ -103,7 +103,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-4">
+                    <div class="col-md-4">
                         <div class="card card-outline card-primary">
                             <div class="card-header">
                                 <h3 class="card-title">
@@ -393,17 +393,19 @@
                             id: id
                         },
                         success: function(res) {
-                            console.log('berhasil hapus')
                             viewPosition($('input[name="idPosition"]').val())
-                            $('#positionContainer').html('')
-                            $('#positionContainer').html(`
-                                    <select name="new_user" id="new_user" class="form-control">
-                                        @foreach (\App\Models\User::where('position_id', null)->get() as $item)
-                                            <option value="{{ $item->uuid }}">{{ $item->name }}</option>
-                                        @endforeach
-                                    </select>
-                            `)
-                            $('select[name="new_user"]').select2()
+                            var select = $('#new_user')
+                            select.empty()
+                            select.attr('name', 'new_user')
+                            select.attr('id', 'new_user')
+                            select.addClass('select2')
+                            select.select2({
+                                theme: 'bootstrap4'
+                            })
+                            $.each(res.user, function(index, user) {
+                                select.append('<option value="' + user.uuid + '">' + user.name +
+                                    '</option>');
+                            });
                         }
                     })
                 }

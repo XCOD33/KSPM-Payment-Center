@@ -5,10 +5,10 @@ namespace App\Imports;
 use App\Models\User;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\withHeadingRow;
-use Maatwebsite\Excel\Concerns\withMultipleSheets;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class UsersImport implements ToCollection, withHeadingRow, withMultipleSheets
+class UsersImport implements ToCollection, WithHeadingRow, WithMultipleSheets
 {
 
     public function collection(Collection $rows)

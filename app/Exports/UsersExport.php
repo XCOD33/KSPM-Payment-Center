@@ -7,12 +7,12 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
-use Maatwebsite\Excel\Concerns\withColumnWidths;
-use Maatwebsite\Excel\Concerns\withStyles;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Maatwebsite\Excel\Concerns\withMultipleSheets;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class UsersExport implements WithHeadings, WithColumnFormatting, withColumnWidths, withStyles
+class UsersExport implements WithHeadings, WithColumnFormatting, WithColumnWidths, WithStyles
 {
 
     public function headings(): array

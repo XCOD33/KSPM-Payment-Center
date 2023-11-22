@@ -125,7 +125,7 @@ class PositionController extends Controller
         ]);
 
         return response()->json([
-            'success' => true
+            'user' => User::where('position_id', null)->get()
         ]);
     }
 }
