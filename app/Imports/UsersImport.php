@@ -7,6 +7,7 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use PhpOffice\PhpSpreadsheet\Reader\Xml\Style\NumberFormat;
 
 class UsersImport implements ToCollection, WithHeadingRow, WithMultipleSheets
 {
@@ -36,6 +37,13 @@ class UsersImport implements ToCollection, WithHeadingRow, WithMultipleSheets
     {
         return [
             0 => new UsersImport(),
+        ];
+    }
+
+    public function columnFormats(): array
+    {
+        return [
+            'F' => NumberFormat::FORMAT_NUMBER,
         ];
     }
 }
