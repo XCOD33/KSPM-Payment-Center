@@ -91,8 +91,26 @@
         }
 
         function changePassword() {
-            alert('hello');
+            $('#modalLogout').modal('hide')
+            $('#modalChangePassword').modal('show')
         }
+
+        // change password
+        if ($('#modalChangePassword').length) {
+            $('#modalChangePassword').on('hidden.bs.modal', function(e) {
+                $('#modalLogout').modal('show')
+            })
+        }
+
+        $(document).ready(function() {
+            var password_changed = '{{ $password_changed ?? '' }}';
+            if (password_changed == 'false') {
+                $('#modalChangePassword').modal('show')
+                $('#closeModalChangePassword').hide()
+                $('#modalChangePassword input[name="old_password"]').val('password')
+                $('#modalChangePassword input[name="old_password"]').attr('readonly', true)
+            }
+        })
     </script>
 
     @yield('js')
