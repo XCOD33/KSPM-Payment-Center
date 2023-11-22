@@ -163,3 +163,36 @@
         </div>
     </div>
 </div>
+
+<!-- Modal -->
+<div class="modal fade" id="modalChangePassword" data-backdrop="static" data-keyboard="false" tabindex="-1"
+    aria-labelledby="modalChangePasswordLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form class="modal-content" method="POST" action="{{ route('change_password') }}">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalChangePasswordLabel">Change Password</h5>
+            </div>
+            <div class="modal-body">
+                @csrf
+                <div class="mb-3">
+                    <label for="old_password">Password Lama</label>
+                    <input type="password" name="old_password" id="old_password" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password">Password Baru</label>
+                    <input type="password" name="password" id="password" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password_confirmation">Password Konfirmasi</label>
+                    <input type="password" name="password_confirmation" id="password_confirmation"
+                        class="form-control" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal"
+                    id="closeModalChangePassword">Close</button>
+                <button type="submit" class="btn btn-sm btn-success">Save</button>
+            </div>
+        </form>
+    </div>
+</div>

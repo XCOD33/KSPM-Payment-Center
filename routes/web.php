@@ -30,6 +30,7 @@ Route::group(['middleware' => 'isLogin'], function () {
     Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
     Route::group(['prefix' => 'dashboard'], function () {
         Route::get('/', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
+        Route::post('/change-password', [App\Http\Controllers\DashboardController::class, 'change_password'])->name('change_password');
         Route::group(['prefix' => 'manage', 'as' => 'manage.', 'middleware' => 'role:super-admin'], function () {
             Route::group(['prefix' => 'users', 'as' => 'users.'], function () {
                 Route::get('/', [App\Http\Controllers\DashboardController::class, 'manage_users_get'])->name('index');
@@ -70,7 +71,7 @@ Route::group(['middleware' => 'isLogin'], function () {
             });
             Route::get('/get-users', [App\Http\Controllers\DashboardController::class, 'get_users'])->name('get_users');
         });
-        Route::group(['prefix' => 'pembayaran', 'as' => 'pembayaran.'], function () {
+        Route::group(['prefix' => 'pembayaran', 'as' => 'pembayaran.', 'middleware' => 'role:super-admin'], function () {
             Route::get('/', [App\Http\Controllers\Dashboards\PembayaranController::class, 'index'])->name('index');
             Route::get('/get-pembayaran', [App\Http\Controllers\Dashboards\PembayaranController::class, 'get_pembayaran'])->name('get_pembayaran');
             Route::post('/get-pembayaran-user', [App\Http\Controllers\Dashboards\PembayaranController::class, 'get_pembayaran_user'])->name('get_pembayaran_user');

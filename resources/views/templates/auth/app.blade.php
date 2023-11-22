@@ -18,6 +18,33 @@
 </head>
 
 <body class="hold-transition {{ url('/login') ? 'login-page' : 'register-page' }}">
+    @if (session()->has('error'))
+        @php
+            alert()->error('Error', session()->get('error'));
+        @endphp
+    @endif
+
+    @if (session()->has('success'))
+        @php
+            alert()->success('Success', session()->get('success'));
+        @endphp
+    @endif
+
+    @if (session()->has('warning'))
+        @php
+            alert()
+                ->warning('Warning', session()->get('warning'))
+                ->persistent(true, false)
+                ->toToast();
+        @endphp
+    @endif
+
+    @if ($errors->any())
+        @php
+            alert()->html('Error', implode('<br>', $errors->all()), 'error');
+        @endphp
+    @endif
+
     @yield('content')
 
     <!-- jQuery -->

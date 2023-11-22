@@ -13,11 +13,18 @@ use App\Imports\UsersImport;
 use App\Models\Pembayaran;
 use App\Models\PembayaranUser;
 use App\Models\Position;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     public function index()
     {
+        $password_changed = 'true';
+        if (Auth::attempt(['email' => auth()->user()->email, 'password' => 'password'])) {
+            $password_changed = 'false';
+            session()->flash('warning', 'Password anda masih default, silahkan ubah password anda sekarang!');
+        }
+
         $pembayarans = Pembayaran::with(['role_pembayarans' => function ($query) {
             $query->where('role_id', auth()->user()->roles->pluck('id')->first());
         }])->with(['pembayaran_users' => function ($query) {
@@ -45,6 +52,7 @@ class DashboardController extends Controller
             'paid_bill' => $paid_bill,
             'total_active_bill' => $total_active_bill,
             'total_paid_bill' => $total_paid_bill,
+            'password_changed' => $password_changed,
         ]);
     }
 
@@ -188,6 +196,29 @@ class DashboardController extends Controller
             //     }
             // }, 'download-format-tambah-anggota.xlsx', \Maatwebsite\Excel\Excel::XLSX);
             return Excel::download(new UsersExport, 'download-format-tambah-anggota.xlsx');
+        }
+    }
+
+    public function change_password(Request $request)
+    {
+        $request->validate([
+            'old_password' => 'required|string|min:8|max:64',
+            'password' => 'required|string|min:8|max:64',
+            'password_confirmation' => 'required|string|min:8|max:64|same:password',
+        ]);
+
+        if (Auth::attempt(['email' => auth()->user()->email, 'password' => $request->old_password])) {
+            if ($request->old_password == $request->password) {
+                return redirect(route('dashboard'))->with('error', 'Password baru tidak boleh sama dengan password lama!');
+            }
+            $user = User::where('email', auth()->user()->email)->firstOrFail();
+            $user->update([
+                'password' => bcrypt($request->password),
+            ]);
+
+            return redirect(route('dashboard'))->with('success', 'Berhasil mengubah password!');
+        } else {
+            return redirect(route('dashboard'))->with('error', 'Password lama yang anda masukkan salah!');
         }
     }
 }

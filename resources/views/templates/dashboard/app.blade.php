@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AdminLTE 3 | Fixed Sidebar</title>
+    <title>KSPM UTY</title>
 
     @include('templates.dashboard.css')
 </head>
@@ -19,6 +19,15 @@
     @if (session()->has('success'))
         @php
             alert()->success('Success', session()->get('success'));
+        @endphp
+    @endif
+
+    @if (session()->has('warning'))
+        @php
+            alert()
+                ->warning('Warning', session()->get('warning'))
+                ->persistent(true, false)
+                ->toToast();
         @endphp
     @endif
 
@@ -82,8 +91,26 @@
         }
 
         function changePassword() {
-            alert('hello');
+            $('#modalLogout').modal('hide')
+            $('#modalChangePassword').modal('show')
         }
+
+        // change password
+        if ($('#modalChangePassword').length) {
+            $('#modalChangePassword').on('hidden.bs.modal', function(e) {
+                $('#modalLogout').modal('show')
+            })
+        }
+
+        $(document).ready(function() {
+            var password_changed = '{{ $password_changed ?? '' }}';
+            if (password_changed == 'false') {
+                $('#modalChangePassword').modal('show')
+                $('#closeModalChangePassword').hide()
+                $('#modalChangePassword input[name="old_password"]').val('password')
+                $('#modalChangePassword input[name="old_password"]').attr('readonly', true)
+            }
+        })
     </script>
 
     @yield('js')

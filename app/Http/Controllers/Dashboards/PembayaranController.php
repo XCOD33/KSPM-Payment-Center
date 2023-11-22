@@ -25,6 +25,15 @@ class PembayaranController extends Controller
 {
     public function index()
     {
+
+        if (User::where('position_id', null)->count() > 0) {
+            return back()->with('error', 'Terdapat user yang tidak memiliki jabatan. Silahkan perbarui data user terlebih dahulu');
+        }
+
+        if (User::doesntHave('roles')->count() > 0) {
+            session()->flash('warning', 'Terdapat user yang tidak memiliki peran. Sebaiknya perbarui data user terlebih dahulu');
+        }
+
         return view('dashboard.pembayaran.index');
     }
 

@@ -1,12 +1,6 @@
 @extends('templates.auth.app')
 
 @section('content')
-    @if ($errors->any())
-        @php
-            alert()->html('Error', implode('<br>', $errors->all()), 'error');
-        @endphp
-    @endif
-
     <div class="login-box">
         <!-- /.login-logo -->
         <div class="card card-outline card-primary">
