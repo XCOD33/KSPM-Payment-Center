@@ -71,8 +71,8 @@ Route::group(['middleware' => 'isLogin'], function () {
             });
             Route::get('/get-users', [App\Http\Controllers\DashboardController::class, 'get_users'])->name('get_users');
         });
-        Route::group(['prefix' => 'pembayaran', 'as' => 'pembayaran.', 'middleware' => 'role:super-admin'], function () {
-            Route::get('/', [App\Http\Controllers\Dashboards\PembayaranController::class, 'index'])->name('index');
+        Route::group(['prefix' => 'pembayaran', 'as' => 'pembayaran.'], function () {
+            Route::get('/', [App\Http\Controllers\Dashboards\PembayaranController::class, 'index'])->name('index')->middleware('role:super-admin');
             Route::get('/get-pembayaran', [App\Http\Controllers\Dashboards\PembayaranController::class, 'get_pembayaran'])->name('get_pembayaran');
             Route::post('/get-pembayaran-user', [App\Http\Controllers\Dashboards\PembayaranController::class, 'get_pembayaran_user'])->name('get_pembayaran_user');
             Route::post('/detail', [App\Http\Controllers\Dashboards\PembayaranController::class, 'detail'])->name('detail');
