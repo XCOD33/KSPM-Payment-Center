@@ -2,29 +2,42 @@
 
 namespace App\Imports;
 
+use App\Models\Position;
 use App\Models\User;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use PhpOffice\PhpSpreadsheet\Reader\Xml\Style\NumberFormat;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class UsersImport implements ToCollection, WithHeadingRow, WithMultipleSheets
 {
 
     public function collection(Collection $rows)
     {
-        // dd($rows);
-        foreach ($rows as $row) {
-            User::create([
-                'name' => $row['nama_lengkap'],
-                'member_id' => $row['id_anggota'],
-                'nim' => $row['nim'],
-                'year' => $row['tahun'],
-                'email' => $row['email'],
-                'phone' => $row['no_ponsel'],
-                'password' => bcrypt('password'),
-            ]);
+        try {
+            foreach ($rows as $row) {
+                $role = Role::where('name', $row['roles'])->first();
+                $position = Position::where('name', $row['jabatan'])->first()->id;
+
+                $user = User::create([
+                    'name' => $row['nama_lengkap'],
+                    'member_id' => $row['id_anggota'],
+                    'nim' => $row['nim'],
+                    'year' => $row['tahun'],
+                    'email' => $row['email'],
+                    'phone' => $row['no_ponsel'],
+                    'password' => bcrypt('password'),
+                    'position_id' => $position,
+                ]);
+
+                $user->assignRole($role);
+                $user->givePermissionTo(Permission::all());
+            }
+        } catch (\Throwable $th) {
+            throw new \Exception($th->getMessage());
         }
     }
 

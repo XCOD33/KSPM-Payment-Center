@@ -24,6 +24,8 @@ class UsersExport implements WithHeadings, WithColumnFormatting, WithColumnWidth
             'Tahun',
             'Email',
             'No Ponsel',
+            'Roles',
+            'Jabatan',
         ];
     }
 
@@ -36,6 +38,8 @@ class UsersExport implements WithHeadings, WithColumnFormatting, WithColumnWidth
             'D' => '@',
             'E' => '@',
             'F' => '@',
+            'G' => '@',
+            'H' => '@',
         ];
     }
 
@@ -48,6 +52,8 @@ class UsersExport implements WithHeadings, WithColumnFormatting, WithColumnWidth
             'D' => 10,
             'E' => 30,
             'F' => 15,
+            'G' => 15,
+            'H' => 30,
         ];
     }
 
