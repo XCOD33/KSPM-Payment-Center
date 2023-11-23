@@ -19,6 +19,9 @@ class UsersImport implements ToCollection, WithHeadingRow, WithMultipleSheets
     {
         try {
             foreach ($rows as $row) {
+                $row['nim'] = strval($row['nim']);
+                $row['no_ponsel'] = strval($row['no_ponsel']);
+
                 $role = Role::where('name', $row['roles'])->first();
                 $position = Position::where('name', $row['jabatan'])->first()->id;
 
@@ -57,6 +60,20 @@ class UsersImport implements ToCollection, WithHeadingRow, WithMultipleSheets
     {
         return [
             'F' => NumberFormat::FORMAT_TEXT,
+        ];
+    }
+
+    public function rules()
+    {
+        return [
+            'nama_lengkap' => 'required|string',
+            'id_anggota' => 'required|string|unique:users,member_id|min:9|max:9',
+            'password' => 'required|string',
+            'nim' => 'required|string|unique:users,nim|min:10|max:10',
+            'email' => 'required|email|unique:users,email',
+            'no_ponsel' => 'required|string|min:10|max:13',
+            'jabatan' => 'integer',
+            'tahun' => 'required|integer',
         ];
     }
 }
