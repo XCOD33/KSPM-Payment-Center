@@ -49,6 +49,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'password' => 'hashed',
+        'nim' => 'string',
     ];
 
     protected static function boot()
