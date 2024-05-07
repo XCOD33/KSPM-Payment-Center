@@ -15,14 +15,9 @@ class PembayarankuController extends Controller
     $this->user = auth('sanctum')->user();
   }
 
-  public function simple()
+  private function get_pembayaran()
   {
     $user = User::where('id', $this->user->id)->first();
-    $myBills = 0;
-    $totalMyBills = 0;
-    $paidBills = 0;
-    $totalPaidBills = 0;
-    $pembayarans = [];
     foreach ($user->roles as $role) {
       $role_id = $role->id;
       $pembayaran = Pembayaran::whereHas('role_pembayarans', function ($query) use ($role_id) {
@@ -30,6 +25,16 @@ class PembayarankuController extends Controller
       })->get();
       $pembayarans = $pembayaran;
     }
+    return $pembayarans;
+  }
+
+  public function simple()
+  {
+    $myBills = 0;
+    $totalMyBills = 0;
+    $paidBills = 0;
+    $totalPaidBills = 0;
+    $pembayarans = $this->get_pembayaran();
     foreach ($pembayarans as $pembayaran) {
       if ($pembayaran->pembayaran_users->isEmpty()) {
         $myBills++;
@@ -39,7 +44,7 @@ class PembayarankuController extends Controller
           if ($pembayaran_user->user_id == $this->user->id) {
             if ($pembayaran_user->status == 'PAID') {
               $paidBills++;
-              $totalPaidBills += $pembayaran->nominal;
+              $totalPaidBills += $pembayaran_user->total;
             } else {
               $myBills++;
               $totalMyBills += $pembayaran->nominal;
@@ -59,5 +64,9 @@ class PembayarankuController extends Controller
         'totalPaidBills' => "Rp " . number_format($totalPaidBills, 0, ',', '.')
       ]
     ]);
+  }
+
+  public function extended()
+  {
   }
 }
