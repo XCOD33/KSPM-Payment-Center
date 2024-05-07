@@ -54,7 +54,9 @@ class UserController extends Controller
 
   public function detail()
   {
-    $user = auth('sanctum')->user();
+    $user = User::where('id', auth('sanctum')->user()->id)
+      ->with(['roles', 'position'])
+      ->first();
 
     // $pembayarans = [];
     // foreach ($user->roles as $role) {
