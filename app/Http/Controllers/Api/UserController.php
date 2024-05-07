@@ -12,6 +12,7 @@ class UserController extends Controller
   public function __construct()
   {
     $this->middleware('auth:sanctum')->except('login');
+    $this->user = auth('sanctum')->user();
   }
 
   public function login(Request $request)
@@ -37,7 +38,7 @@ class UserController extends Controller
     }
 
     if (auth('sanctum')->check()) {
-      auth('sanctum')->user()->tokens()->delete();
+      $this->user->tokens()->delete();
     }
 
     $token = $user->createToken('api-android')->plainTextToken;
@@ -54,7 +55,7 @@ class UserController extends Controller
 
   public function detail()
   {
-    $user = User::where('id', auth('sanctum')->user()->id)
+    $user = User::where('id', $this->user->id)
       ->with(['roles', 'position'])
       ->first();
 
