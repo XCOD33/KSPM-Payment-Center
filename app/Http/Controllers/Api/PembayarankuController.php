@@ -37,8 +37,13 @@ class PembayarankuController extends Controller
       } else {
         foreach ($pembayaran->pembayaran_users as $pembayaran_user) {
           if ($pembayaran_user->user_id == $this->user->id) {
-            $paidBills++;
-            $totalPaidBills += $pembayaran_user->total;
+            if ($pembayaran_user->status == 'PAID') {
+              $paidBills++;
+              $totalPaidBills += $pembayaran->nominal;
+            } else {
+              $myBills++;
+              $totalMyBills += $pembayaran->nominal;
+            }
           }
         }
       }
