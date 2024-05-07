@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Pembayaran;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -28,6 +29,7 @@ class UserController extends Controller
     ]);
 
     $user = User::where('nim', $request->nim)->first();
+
     if (!$user || !password_verify($request->password, $user->password)) {
       return response()->json([
         'message' => 'NIM atau password salah'
@@ -43,7 +45,29 @@ class UserController extends Controller
     return response()->json([
       'success' => true,
       'message' => 'Login berhasil',
-      'token' => $token
+      'data' => [
+        'token' => $token,
+        'nama' => $user->name,
+      ]
+    ]);
+  }
+
+  public function detail()
+  {
+    $user = auth('sanctum')->user();
+
+    // $pembayarans = [];
+    // foreach ($user->roles as $role) {
+    //   $role_id = $role->id;
+    //   $pembayarans = Pembayaran::whereHas('role_pembayarans', function ($query) use ($role_id) {
+    //     $query->where('role_id', $role_id);
+    //   })->get();
+    // }
+
+    return response()->json([
+      'success' => true,
+      'message' => 'Detail User : ' . $user->name,
+      'data' => $user,
     ]);
   }
 
