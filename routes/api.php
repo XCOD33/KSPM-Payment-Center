@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();
-// });
+// }); 
 
 Route::group(['middleware', 'auth:sanctum'], function () {
   route::group(['prefix' => 'users', 'controller' => UserController::class], function () {
@@ -30,5 +30,6 @@ Route::group(['middleware', 'auth:sanctum'], function () {
   route::group(['prefix' => 'pembayaranku', 'controller' => PembayarankuController::class], function () {
     route::get('/simple', 'simple');
     route::get('/bills', 'bills');
+    route::get('/bills/{url}', 'bill_detail');
   });
 });
