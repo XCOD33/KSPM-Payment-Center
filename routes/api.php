@@ -24,6 +24,7 @@ Route::group(['middleware', 'auth:sanctum'], function () {
   route::group(['prefix' => 'users', 'controller' => UserController::class], function () {
     route::post('login', 'login');
     route::get('detail', 'detail');
+    Route::post('change-password', 'change_password');
     route::post('logout', 'logout');
   });
   route::group(['prefix' => 'pembayaranku', 'controller' => PembayarankuController::class], function () {

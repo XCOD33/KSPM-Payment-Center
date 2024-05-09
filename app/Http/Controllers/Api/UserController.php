@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Pembayaran;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -59,18 +60,48 @@ class UserController extends Controller
       ->with(['roles', 'position'])
       ->first();
 
-    // $pembayarans = [];
-    // foreach ($user->roles as $role) {
-    //   $role_id = $role->id;
-    //   $pembayarans = Pembayaran::whereHas('role_pembayarans', function ($query) use ($role_id) {
-    //     $query->where('role_id', $role_id);
-    //   })->get();
-    // }
-
     return response()->json([
       'success' => true,
       'message' => 'Detail User : ' . $user->name,
       'data' => $user,
+    ]);
+  }
+
+  public function change_password(Request $request)
+  {
+    $request->validate([
+      'old_password' => 'required|min:8|max:255',
+      'new_password' => 'required|min:8|max:255',
+    ], [
+      'old_password.required' => 'Password lama harus diisi',
+      'old_password.min' => 'Password lama minimal 8 karakter',
+      'old_password.max' => 'Password lama maksimal 255 karakter',
+      'new_password.required' => 'Password baru harus diisi',
+      'new_password.min' => 'Password baru minimal 8 karakter',
+      'new_password.max' => 'Password baru maksimal 255 karakter'
+    ]);
+
+    $user = User::where('id', $this->user->id)->first();
+
+    if (!Hash::check($request->old_password, $user->password)) {
+      return response()->json([
+        'success' => false,
+        'message' => 'Password lama salah'
+      ], 401);
+    }
+
+    if (Hash::check($request->new_password, $user->password)) {
+      return response()->json([
+        'success' => false,
+        'message' => 'Password baru tidak boleh sama dengan password lama'
+      ], 401);
+    }
+
+    $user->password = Hash::make($request->new_password);
+    $user->save();
+    return response()->json([
+      'success' => true,
+      'message' => 'Password berhasil diubah'
     ]);
   }
 
