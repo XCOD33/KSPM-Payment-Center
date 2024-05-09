@@ -31,5 +31,6 @@ Route::group(['middleware', 'auth:sanctum'], function () {
     route::get('/simple', 'simple');
     route::get('/bills', 'bills');
     route::get('/bills/{url}', 'bill_detail');
+    route::post('/bills/{url}/pay', 'pay');
   });
 });

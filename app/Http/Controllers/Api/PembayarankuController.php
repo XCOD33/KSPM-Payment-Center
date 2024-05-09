@@ -8,6 +8,7 @@ use App\Models\PembayaranUser;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Nekoding\Tripay\Networks\HttpClient;
+use Nekoding\Tripay\Signature;
 use Nekoding\Tripay\Tripay;
 
 class PembayarankuController extends Controller
@@ -16,6 +17,7 @@ class PembayarankuController extends Controller
   {
     $this->middleware('auth:sanctum');
     $this->user = auth('sanctum')->user();
+    $this->tripay = new Tripay(new HttpClient(config('app.tripay_api_key')));
   }
 
   private function get_pembayaran()
@@ -132,7 +134,6 @@ class PembayarankuController extends Controller
 
   public function bill_detail($url)
   {
-    $tripay = new Tripay(new HttpClient(config('app.tripay_api_key')));
 
     $pembayaran = Pembayaran::where('url', $url)->first();
     if (!$pembayaran) {
@@ -142,7 +143,7 @@ class PembayarankuController extends Controller
       ], 404);
     }
 
-    $fees = $tripay->getChannelPembayaran()['data'];
+    $fees = $this->tripay->getChannelPembayaran()['data'];
     $channels = array_map(function ($item) use ($pembayaran) {
       $item['total'] = ($item['total_fee']['flat'] + $pembayaran->nominal) + ($item['total_fee']['percent'] / 100 * ($pembayaran->nominal + $item['total_fee']['flat']));
       return $item;
@@ -157,5 +158,44 @@ class PembayarankuController extends Controller
         'channels' => $channels
       ]
     ]);
+  }
+
+  public function pay(Request $request, $url)
+  {
+    $request->validate([
+      'payment_code' => 'required',
+    ]);
+
+    $pembayaran = Pembayaran::where('url', $url)->first();
+    if (!$pembayaran) {
+      return response()->json([
+        'success' => false,
+        'message' => 'Data pembayaran tidak ditemukan'
+      ], 404);
+    }
+
+    $pembayaran_user = $this->get_pembayaran_user($pembayaran->id);
+
+    $dataToTripay = [
+      'method' => $request->payment_code,
+      'merchant_ref' => $pembayaran_user->invoice_id,
+      'amount' => $pembayaran->nominal,
+      'customer_name' => $this->user->name,
+      'customer_email' => $this->user->email,
+      'customer_phone' => $this->user->phone,
+      'order_items' => [
+        [
+          'name' => $pembayaran->name,
+          'price' => $pembayaran->nominal,
+          'quantity' => 1
+        ]
+      ],
+      'return_url' => 'https://localhost:8000',
+      'expired_time' => (time() + (24 * 60 * 60)), // 24 jam
+      'signature' => Signature::generate($pembayaran_user->invoice_id . $pembayaran->nominal)
+    ];
+
+    $res = $this->tripay->createTransaction($dataToTripay, Tripay::CLOSE_TRANSACTION);
+    return $res->getResponse();
   }
 }
