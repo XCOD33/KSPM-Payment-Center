@@ -15,7 +15,7 @@ class PembayarankuController extends Controller
 {
   public function __construct()
   {
-    $this->middleware('auth:sanctum');
+    $this->middleware('auth:sanctum')->except('tripay_callback');
     $this->user = auth('sanctum')->user();
     $this->tripay = new Tripay(new HttpClient(config('app.tripay_api_key')));
   }
@@ -196,6 +196,100 @@ class PembayarankuController extends Controller
     ];
 
     $res = $this->tripay->createTransaction($dataToTripay, Tripay::CLOSE_TRANSACTION);
+
+    if ($res->getResponse()['success'] === false) {
+      return response()->json([
+        'success' => false,
+        'message' => $res->getResponse()['message']
+      ]);
+    }
+
+    $data_response = $res->getResponse()['data'];
+    $pembayaran_user->update([
+      'payment_method' => $data_response['payment_name'],
+      'payment_method_code' => $data_response['payment_method'],
+    ]);
+
     return $res->getResponse();
+  }
+
+  public function tripay_callback(Request $request)
+  {
+    $callbackSignature = $request->server('HTTP_X_CALLBACK_SIGNATURE');
+    $json = $request->getContent();
+    $signature = hash_hmac('sha256', $json, config('app.tripay_private_key'));
+
+    if ($signature !== (string) $callbackSignature) {
+      return response()->json([
+        'success' => false,
+        'message' => 'Signature tidak valid'
+      ]);
+    }
+
+    if ('payment_status' !== (string) $request->server('HTTP_X_CALLBACK_EVENT')) {
+      return response()->json([
+        'success' => false,
+        'message' => 'Event tidak valid'
+      ]);
+    }
+
+    $data = json_decode($json);
+
+    if (JSON_ERROR_NONE !== json_last_error()) {
+      return response()->json([
+        'success' => false,
+        'message' => 'Data tidak valid'
+      ]);
+    }
+
+    $invoice_id = $data->merchant_ref;
+    $status = strtoupper((string) $data->status);
+
+    if ($data->is_closed_payment === 1) {
+      $pembayaran_user = PembayaranUser::where('invoice_id', $invoice_id)
+        ->where('status', 'UNPAID')
+        ->first();
+
+      if (!$pembayaran_user) {
+        return response()->json([
+          'success' => false,
+          'message' => 'Data pembayaran tidak ditemukan atau sudah dibayar: ' . $invoice_id
+        ]);
+      }
+
+      switch ($status) {
+        case 'PAID':
+          $pembayaran_user->update([
+            'status' => 'PAID',
+            'total_fee' => $data->total_fee,
+            'subtotal' => $data->amount_received,
+            'total' => $data->total_amount
+          ]);
+          break;
+
+        case 'EXPIRED':
+          $pembayaran_user->update([
+            'status' => 'EXPIRED'
+          ]);
+          break;
+
+        case 'FAILED':
+          $pembayaran_user->update([
+            'status' => 'FAILED'
+          ]);
+          break;
+
+        default:
+          return response()->json([
+            'success' => false,
+            'message' => 'Status tidak valid'
+          ]);
+      }
+
+      return response()->json([
+        'success' => true,
+        'message' => 'Pembayaran berhasil'
+      ]);
+    }
   }
 }

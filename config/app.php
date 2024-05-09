@@ -5,7 +5,7 @@ use Illuminate\Support\ServiceProvider;
 
 return [
 
-    /*
+  /*
     |--------------------------------------------------------------------------
     | Application Name
     |--------------------------------------------------------------------------
@@ -16,9 +16,9 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+  'name' => env('APP_NAME', 'Laravel'),
 
-    /*
+  /*
     |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
@@ -29,9 +29,9 @@ return [
     |
     */
 
-    'env' => env('APP_ENV', 'production'),
+  'env' => env('APP_ENV', 'production'),
 
-    /*
+  /*
     |--------------------------------------------------------------------------
     | Application Debug Mode
     |--------------------------------------------------------------------------
@@ -42,9 +42,9 @@ return [
     |
     */
 
-    'debug' => (bool) env('APP_DEBUG', false),
+  'debug' => (bool) env('APP_DEBUG', false),
 
-    /*
+  /*
     |--------------------------------------------------------------------------
     | Application URL
     |--------------------------------------------------------------------------
@@ -55,11 +55,11 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+  'url' => env('APP_URL', 'http://localhost'),
 
-    'asset_url' => env('ASSET_URL'),
+  'asset_url' => env('ASSET_URL'),
 
-    /*
+  /*
     |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
@@ -70,9 +70,9 @@ return [
     |
     */
 
-    'timezone' => 'Asia/Jakarta',
+  'timezone' => 'Asia/Jakarta',
 
-    /*
+  /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration
     |--------------------------------------------------------------------------
@@ -83,9 +83,9 @@ return [
     |
     */
 
-    'locale' => 'en',
+  'locale' => 'en',
 
-    /*
+  /*
     |--------------------------------------------------------------------------
     | Application Fallback Locale
     |--------------------------------------------------------------------------
@@ -96,9 +96,9 @@ return [
     |
     */
 
-    'fallback_locale' => 'en',
+  'fallback_locale' => 'en',
 
-    /*
+  /*
     |--------------------------------------------------------------------------
     | Faker Locale
     |--------------------------------------------------------------------------
@@ -109,9 +109,9 @@ return [
     |
     */
 
-    'faker_locale' => 'en_US',
+  'faker_locale' => 'en_US',
 
-    /*
+  /*
     |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
@@ -122,11 +122,11 @@ return [
     |
     */
 
-    'key' => env('APP_KEY'),
+  'key' => env('APP_KEY'),
 
-    'cipher' => 'AES-256-CBC',
+  'cipher' => 'AES-256-CBC',
 
-    /*
+  /*
     |--------------------------------------------------------------------------
     | Maintenance Mode Driver
     |--------------------------------------------------------------------------
@@ -139,12 +139,12 @@ return [
     |
     */
 
-    'maintenance' => [
-        'driver' => 'file',
-        // 'store'  => 'redis',
-    ],
+  'maintenance' => [
+    'driver' => 'file',
+    // 'store'  => 'redis',
+  ],
 
-    /*
+  /*
     |--------------------------------------------------------------------------
     | Autoloaded Service Providers
     |--------------------------------------------------------------------------
@@ -155,28 +155,28 @@ return [
     |
     */
 
-    'providers' => ServiceProvider::defaultProviders()->merge([
-        /*
+  'providers' => ServiceProvider::defaultProviders()->merge([
+    /*
          * Package Service Providers...
          */
 
-        /*
+    /*
          * Application Service Providers...
          */
-        App\Providers\AppServiceProvider::class,
-        App\Providers\AuthServiceProvider::class,
-        // App\Providers\BroadcastServiceProvider::class,
-        App\Providers\EventServiceProvider::class,
-        App\Providers\RouteServiceProvider::class,
-        // custom
-        Spatie\Permission\PermissionServiceProvider::class,
-        Yajra\DataTables\DataTablesServiceProvider::class,
-        RealRashid\SweetAlert\SweetAlertServiceProvider::class,
-        Maatwebsite\Excel\ExcelServiceProvider::class,
-        Barryvdh\Debugbar\ServiceProvider::class,
-    ])->toArray(),
+    App\Providers\AppServiceProvider::class,
+    App\Providers\AuthServiceProvider::class,
+    // App\Providers\BroadcastServiceProvider::class,
+    App\Providers\EventServiceProvider::class,
+    App\Providers\RouteServiceProvider::class,
+    // custom
+    Spatie\Permission\PermissionServiceProvider::class,
+    Yajra\DataTables\DataTablesServiceProvider::class,
+    RealRashid\SweetAlert\SweetAlertServiceProvider::class,
+    Maatwebsite\Excel\ExcelServiceProvider::class,
+    Barryvdh\Debugbar\ServiceProvider::class,
+  ])->toArray(),
 
-    /*
+  /*
     |--------------------------------------------------------------------------
     | Class Aliases
     |--------------------------------------------------------------------------
@@ -187,15 +187,15 @@ return [
     |
     */
 
-    'aliases' => Facade::defaultAliases()->merge([
-        // 'Example' => App\Facades\Example::class,
-        'Alert' => RealRashid\SweetAlert\Facades\Alert::class,
-        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
-        'Tripay' => App\Facades\Tripay::class,
-        'Debugbar' => Barryvdh\Debugbar\Facades\Debugbar::class,
-    ])->toArray(),
+  'aliases' => Facade::defaultAliases()->merge([
+    // 'Example' => App\Facades\Example::class,
+    'Alert' => RealRashid\SweetAlert\Facades\Alert::class,
+    'Excel' => Maatwebsite\Excel\Facades\Excel::class,
+    'Tripay' => App\Facades\Tripay::class,
+    'Debugbar' => Barryvdh\Debugbar\Facades\Debugbar::class,
+  ])->toArray(),
 
-    'tripay_api_key' => env('TRIPAY_API_KEY'),
-    'tripay_private_key' => env('TRIPAY_PRI_KEY'),
-    'tripay_merchant_code' => env('TRIPAY_MERCHANT_CODE'),
+  'tripay_api_key' => env('TRIPAY_API_KEY'),
+  'tripay_private_key' => env('TRIPAY_PRIVATE_KEY'),
+  'tripay_merchant_code' => env('TRIPAY_MERCHANT_CODE'),
 ];

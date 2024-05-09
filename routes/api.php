@@ -34,3 +34,5 @@ Route::group(['middleware', 'auth:sanctum'], function () {
     route::post('/bills/{url}/pay', 'pay');
   });
 });
+
+route::post('/tripay/callback', [PembayarankuController::class, 'tripay_callback']);
