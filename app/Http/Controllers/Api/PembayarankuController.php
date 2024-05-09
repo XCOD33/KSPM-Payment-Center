@@ -20,10 +20,23 @@ class PembayarankuController extends Controller
     $user = User::where('id', $this->user->id)->first();
     foreach ($user->roles as $role) {
       $role_id = $role->id;
-      $pembayaran = Pembayaran::whereHas('role_pembayarans', function ($query) use ($role_id) {
+      $pembayarans = Pembayaran::whereHas('role_pembayarans', function ($query) use ($role_id) {
         $query->where('role_id', $role_id);
       })->get();
-      $pembayarans = $pembayaran;
+    }
+    return $pembayarans;
+  }
+
+  private function get_pembayaran_user()
+  {
+    $user = User::where('id', $this->user->id)->first();
+    foreach ($user->roles as $role) {
+      $role_id = $role->id;
+      $pembayarans = Pembayaran::whereHas('role_pembayarans', function ($query) use ($role_id) {
+        $query->where('role_id', $role_id);
+      })->with(['pembayaran_users' => function ($query) use ($user) {
+        $query->where('user_id', $user->id)->take(1);
+      }])->get();
     }
     return $pembayarans;
   }
@@ -66,7 +79,12 @@ class PembayarankuController extends Controller
     ]);
   }
 
-  public function extended()
+  public function bills()
   {
+    return response()->json([
+      'success' => true,
+      'message' => 'Data pembayaran berhasil diambil',
+      'data' => $this->get_pembayaran_user()
+    ]);
   }
 }

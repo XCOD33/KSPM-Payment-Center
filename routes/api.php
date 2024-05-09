@@ -29,5 +29,6 @@ Route::group(['middleware', 'auth:sanctum'], function () {
   });
   route::group(['prefix' => 'pembayaranku', 'controller' => PembayarankuController::class], function () {
     route::get('/simple', 'simple');
+    route::get('/bills', 'bills');
   });
 });

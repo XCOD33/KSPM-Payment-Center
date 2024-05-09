@@ -99,6 +99,9 @@ class UserController extends Controller
 
     $user->password = Hash::make($request->new_password);
     $user->save();
+
+    $this->user->tokens()->delete();
+
     return response()->json([
       'success' => true,
       'message' => 'Password berhasil diubah'
