@@ -13,47 +13,93 @@ use App\Imports\UsersImport;
 use App\Models\Pembayaran;
 use App\Models\PembayaranUser;
 use App\Models\Position;
+use App\Models\RolePembayaran;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Models\Role;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $password_changed = 'true';
-        if (Auth::attempt(['email' => auth()->user()->email, 'password' => 'password'])) {
-            $password_changed = 'false';
-            session()->flash('warning', 'Password anda masih default, silahkan ubah password anda sekarang!');
-        }
+        if (auth()->user()->hasRole('super-admin')) {
+            $total_users = User::count();
+            $total_roles = Role::count();
+            $total_positions = Position::count();
 
-        $pembayarans = Pembayaran::with(['role_pembayarans' => function ($query) {
-            $query->where('role_id', auth()->user()->roles->pluck('id')->first());
-        }])->with(['pembayaran_users' => function ($query) {
-            $query->where('user_id', auth()->user()->id)->where('status', 'PAID');
-        }])->get();
+            $total_pembayarans = Pembayaran::count();
+            $role_pembayarans = RolePembayaran::all();
+            $total_users_belum_bayar = 0;
+            $total_users_bayar = PembayaranUser::where('status', 'PAID')->count();
+            $total_uang_belum_terkumpul = 0;
+            $total_uang_terkumpul = PembayaranUser::where('status', 'PAID')->sum('subtotal');
+            // Menggunakan perulangan foreach untuk mengiterasi setiap objek Pembayaran
+            foreach (Pembayaran::all() as $pembayaran) {
+                // Mengambil daftar role_id dari objek RolePembayaran yang terkait dengan Pembayaran saat ini
+                $rolePembayaran = $pembayaran->role_pembayarans->pluck('role_id');
 
-        $active_bill = 0;
-        $paid_bill = 0;
-        $total_active_bill = 0;
-        $total_paid_bill = 0;
-        foreach ($pembayarans as $pembayaran) {
-            if ($pembayaran->role_pembayarans->count() != 0) {
-                if ($pembayaran->pembayaran_users->count() == 0) {
-                    $active_bill++;
-                    $total_active_bill += $pembayaran->nominal;
-                } else {
-                    $paid_bill++;
-                    $total_paid_bill += $pembayaran->nominal;
+                // Mengambil daftar User yang belum melakukan pembayaran berdasarkan role_id yang terkait dengan Pembayaran saat ini
+                $usersBelumBayar = User::whereHas('roles', function ($query) use ($rolePembayaran) {
+                    $query->whereIn('id', $rolePembayaran);
+                })->get();
+
+                // Memfilter daftar User yang belum melakukan pembayaran berdasarkan Pembayaran saat ini
+                $usersBelumBayar = $usersBelumBayar->filter(function ($user) use ($pembayaran) {
+                    $pembayaranUser = $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first();
+                    return !$pembayaranUser || ($pembayaranUser && $pembayaranUser->pivot && $pembayaranUser->pivot->status != 'PAID');
+                });
+
+                // Menambahkan jumlah User yang belum melakukan pembayaran ke total_users_belum_bayar
+                $total_users_belum_bayar += $usersBelumBayar->count();
+                $total_uang_belum_terkumpul += $usersBelumBayar->count() * $pembayaran->nominal;
+            }
+
+            return view('dashboard.index', [
+                'total_users' => $total_users,
+                'total_roles' => $total_roles,
+                'total_positions' => $total_positions,
+                'total_pembayarans' => $total_pembayarans,
+                'total_users_belum_bayar' => $total_users_belum_bayar,
+                'total_users_bayar' => $total_users_bayar,
+                'total_uang_belum_terkumpul' => $total_uang_belum_terkumpul,
+                'total_uang_terkumpul' => $total_uang_terkumpul,
+            ]);
+        } else {
+            $password_changed = 'true';
+            if (Auth::attempt(['email' => auth()->user()->email, 'password' => 'password'])) {
+                $password_changed = 'false';
+                session()->flash('warning', 'Password anda masih default, silahkan ubah password anda sekarang!');
+            }
+
+            $pembayarans = Pembayaran::with(['role_pembayarans' => function ($query) {
+                $query->where('role_id', auth()->user()->roles->pluck('id')->first());
+            }])->with(['pembayaran_users' => function ($query) {
+                $query->where('user_id', auth()->user()->id)->where('status', 'PAID');
+            }])->get();
+
+            $active_bill = 0;
+            $paid_bill = 0;
+            $total_active_bill = 0;
+            $total_paid_bill = 0;
+            foreach ($pembayarans as $pembayaran) {
+                if ($pembayaran->role_pembayarans->count() != 0) {
+                    if ($pembayaran->pembayaran_users->count() == 0) {
+                        $active_bill++;
+                        $total_active_bill += $pembayaran->nominal;
+                    } else {
+                        $paid_bill++;
+                        $total_paid_bill += $pembayaran->nominal;
+                    }
                 }
             }
-        }
 
-        return view('dashboard.index', [
-            'active_bill' => $active_bill,
-            'paid_bill' => $paid_bill,
-            'total_active_bill' => $total_active_bill,
-            'total_paid_bill' => $total_paid_bill,
-            'password_changed' => $password_changed,
-        ]);
+            return view('dashboard.index', [
+                'active_bill' => $active_bill,
+                'paid_bill' => $paid_bill,
+                'total_active_bill' => $total_active_bill,
+                'total_paid_bill' => $total_paid_bill,
+                'password_changed' => $password_changed,
+            ]);
+        }
     }
 
     public function manage_users_get()
