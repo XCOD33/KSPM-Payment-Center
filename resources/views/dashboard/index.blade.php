@@ -299,7 +299,7 @@
                         orderable: false,
                         searchable: false,
                         render: function(data, type, row) {
-                            return `<a href="{{ url('dashboard/pembayaran/detail') }}/${row.uuid}" class="btn btn-sm btn-primary"><i class="fas fa-eye"></i></a>`
+                            return `<a href="{{ url('dashboard/pembayaran/detail') }}/${row.uuid}?from=index" class="btn btn-sm btn-primary"><i class="fas fa-eye"></i></a>`
                         }
                     }
                 ]

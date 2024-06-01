@@ -17,7 +17,12 @@
             <div class="container-fluid">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Detail Pembayaran</h3>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="card-title">Detail Pembayaran</h3>
+                            <a href="{{ $backUrl }}" class="btn btn-sm btn-primary"><i
+                                    class="fas fa-angle-left mr-2"></i>
+                                Kembali</a>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="table table-responsive" id="dt-container">

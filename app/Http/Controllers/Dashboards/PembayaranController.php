@@ -252,6 +252,7 @@ class PembayaranController extends Controller
 
             return view('dashboard.pembayaran.detail', [
                 'pembayaran' => $pembayaran,
+                'backUrl' => $request->query('from') == 'index' ? route('dashboard') : route('pembayaran.index'),
             ]);
         }
     }
