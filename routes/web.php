@@ -31,6 +31,7 @@ Route::group(['middleware' => 'isLogin'], function () {
     Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
     Route::group(['prefix' => 'dashboard'], function () {
         Route::get('/', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/data', [App\Http\Controllers\DashboardController::class, 'data'])->name('dashboard.data');
         Route::post('/change-password', [App\Http\Controllers\DashboardController::class, 'change_password'])->name('change_password');
         Route::group(['prefix' => 'manage', 'as' => 'manage.', 'middleware' => 'role:super-admin'], function () {
             Route::group(['prefix' => 'users', 'as' => 'users.'], function () {

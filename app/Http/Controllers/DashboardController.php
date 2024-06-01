@@ -16,6 +16,7 @@ use App\Models\Position;
 use App\Models\RolePembayaran;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
+use Yajra\DataTables\DataTables as DataTablesDataTables;
 
 class DashboardController extends Controller
 {
@@ -100,6 +101,74 @@ class DashboardController extends Controller
                 'password_changed' => $password_changed,
             ]);
         }
+    }
+
+    public function data(Request $request)
+    {
+        $pembayarans = Pembayaran::latest()->take(3);
+
+        $data = DataTables::of($pembayarans)
+            ->addIndexColumn()
+            ->addColumn('created_by', function ($q) {
+                return User::where('id', $q->created_by)->first()->name;
+            })
+            ->addColumn('tagihan', function ($q) {
+                $rolePembayaran = Pembayaran::with('role_pembayarans')
+                    ->where('uuid', $q->uuid)
+                    ->first()
+                    ->role_pembayarans
+                    ->pluck('role_id');
+
+                $users = User::with(['roles'])
+                    ->whereHas('roles', function ($query) use ($rolePembayaran) {
+                        $query->whereIn('id', $rolePembayaran);
+                    })
+                    ->get();
+
+                return $users->count();
+            })
+            ->addColumn('terbayar', function ($q) {
+                $rolePembayaran = Pembayaran::with('role_pembayarans')
+                    ->where('uuid', $q->uuid)
+                    ->first()
+                    ->role_pembayarans
+                    ->pluck('role_id');
+
+                $users = User::with(['roles'])
+                    ->whereHas('roles', function ($query) use ($rolePembayaran) {
+                        $query->whereIn('id', $rolePembayaran);
+                    })
+                    ->whereHas('pembayaran_users', function ($query) {
+                        $query->where('status', 'PAID');
+                    })
+                    ->get();
+
+                return $users->count();
+            })
+            ->addColumn('sisa', function ($q) {
+                $rolePembayaran = Pembayaran::with('role_pembayarans')
+                    ->where('uuid', $q->uuid)
+                    ->first()
+                    ->role_pembayarans
+                    ->pluck('role_id');
+
+                $users = User::with(['roles'])
+                    ->whereHas('roles', function ($query) use ($rolePembayaran) {
+                        $query->whereIn('id', $rolePembayaran);
+                    })
+                    ->where(function ($query) {
+                        $query->whereDoesntHave('pembayaran_users')
+                            ->orWhereHas('pembayaran_users', function ($query) {
+                                $query->where('status', '!=', 'PAID');
+                            });
+                    })
+                    ->get();
+
+                return $users->count();
+            })
+            ->toJson();
+
+        return $data;
     }
 
     public function manage_users_get()

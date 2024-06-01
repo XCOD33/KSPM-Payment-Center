@@ -74,8 +74,8 @@
                                     <a href="{{ route('pembayaran.index') }}"
                                         class="display-bloc text-decoration-none text-dark">
                                         <div class="info-box">
-                                            <div class="info-box-icon bg-warning">
-                                                <i class="fas fa-user"></i>
+                                            <div class="info-box-icon bg-success">
+                                                <i class="fas fa-wallet"></i>
                                             </div>
                                             <div class="info-box-content">
                                                 <span class="info-box-text text-black">Jumlah Pembayaran</span>
@@ -86,8 +86,8 @@
                                 </div>
                                 <div class="col-md-4 col-sm-6 col-12">
                                     <div class="info-box">
-                                        <div class="info-box-icon bg-warning">
-                                            <i class="fas fa-user"></i>
+                                        <div class="info-box-icon bg-danger">
+                                            <i class="fas fa-times"></i>
                                         </div>
                                         <div class="info-box-content">
                                             <span class="info-box-text text-black">User Belum Membayar</span>
@@ -95,10 +95,10 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4 col-sm-6 col-12">
+                                <div class="col-md-4 col-sm-12 col-12">
                                     <div class="info-box">
-                                        <div class="info-box-icon bg-warning">
-                                            <i class="fas fa-user"></i>
+                                        <div class="info-box-icon bg-primary">
+                                            <i class="fas fa-user-check"></i>
                                         </div>
                                         <div class="info-box-content">
                                             <span class="info-box-text text-black">User Sudah Membayar</span>
@@ -113,7 +113,7 @@
                         <div class="col-md-6 col-12">
                             <div class="info-box">
                                 <div class="info-box-icon bg-warning">
-                                    <i class="fas fa-user"></i>
+                                    <i class="fas fa-hand-holding-usd"></i>
                                 </div>
                                 <div class="info-box-content">
                                     <span class="info-box-text text-black">Total Uang Belum Diterima</span>
@@ -124,13 +124,41 @@
                         </div>
                         <div class="col-md-6 col-12">
                             <div class="info-box">
-                                <div class="info-box-icon bg-warning">
-                                    <i class="fas fa-user"></i>
+                                <div class="info-box-icon bg-secondary">
+                                    <i class="fas fa-piggy-bank"></i>
                                 </div>
                                 <div class="info-box-content">
                                     <span class="info-box-text text-black">Total Uang Diterima</span>
                                     <span class="info-box-number text-black">Rp
                                         {{ number_format($total_uang_terkumpul, 0, ',', '.') }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="card col-12">
+                            <div class="card-body">
+                                <div class="table-responsive" id="dt-container">
+                                    <table class="table table-bordered table-responsive-xl text-center" id="dt-data">
+                                        <thead>
+                                            <tr>
+                                                <th rowspan="2" class="align-middle">#</th>
+                                                <th rowspan="2" class="align-middle">Nama</th>
+                                                <th rowspan="2" class="align-middle">Nominal</th>
+                                                <th rowspan="2" class="align-middle">Pembuatan</th>
+                                                <th rowspan="2" class="align-middle">Terakhir Pembayaran</th>
+                                                <th rowspan="2" class="align-middle">Dibuat Oleh</th>
+                                                <th rowspan="2" class="align-middle">Status</th>
+                                                <th colspan="3" class="align-middle">Pembayaran</th>
+                                                <th rowspan="2" class="align-middle">Aksi</th>
+                                            </tr>
+                                            <tr>
+                                                <th>Tagihan</th>
+                                                <th>Terbayar</th>
+                                                <th>Sisa</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -193,4 +221,80 @@
         </section>
         <!-- /.content -->
     </div>
+@endsection
+
+@section('js')
+    <script>
+        $(document).ready(function() {
+            $('#dt-data').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: "{{ route('dashboard.data') }}",
+                columns: [{
+                        data: 'DT_RowIndex',
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'name',
+                        name: 'name'
+                    },
+                    {
+                        data: 'nominal',
+                        name: 'nominal',
+                        render: function(data) {
+                            return `Rp ${data.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}`
+                        }
+                    },
+                    {
+                        data: 'created_at',
+                        name: 'created_at',
+                        render: function(data) {
+                            return moment(data).format('DD-MMM-YYYY HH:mm');
+                        }
+                    },
+                    {
+                        data: 'expired_at',
+                        name: 'expired_at',
+                        render: function(data) {
+                            return moment(data).format('DD-MMM-YYYY HH:mm');
+                        }
+                    },
+                    {
+                        data: 'created_by',
+                        name: 'created_by',
+                    },
+                    {
+                        data: 'status',
+                        name: 'status',
+                        render: function(data) {
+                            return `<div class="badge badge-${data == 'active' ? 'success' : 'danger'}">${data.toUpperCase()}</div>`
+                        }
+                    },
+                    {
+                        data: 'tagihan',
+                        name: 'tagihan'
+                    },
+                    {
+                        data: 'terbayar',
+                        name: 'terbayar'
+                    },
+                    {
+                        data: 'sisa',
+                        name: 'sisa'
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false,
+                        render: function(data, type, row) {
+                            return `<a href="{{ url('manage/pembayaran') }}/${row.uuid}" class="btn btn-sm btn-primary"><i class="fas fa-eye"></i></a>`
+                        }
+                    }
+                ]
+            });
+        });
+    </script>
 @endsection
