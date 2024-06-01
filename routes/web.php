@@ -77,6 +77,7 @@ Route::group(['middleware' => 'isLogin'], function () {
             Route::get('/', [App\Http\Controllers\Dashboards\PembayaranController::class, 'index'])->name('index')->middleware('role:super-admin');
             Route::get('/get-pembayaran', [App\Http\Controllers\Dashboards\PembayaranController::class, 'get_pembayaran'])->name('get_pembayaran');
             Route::post('/get-pembayaran-user', [App\Http\Controllers\Dashboards\PembayaranController::class, 'get_pembayaran_user'])->name('get_pembayaran_user');
+            Route::get('/detail/{uuid}', [App\Http\Controllers\Dashboards\PembayaranController::class, 'detail_pembayaran'])->name('detail_pembayaran');
             Route::post('/detail', [App\Http\Controllers\Dashboards\PembayaranController::class, 'detail'])->name('detail');
             Route::post('/store', [App\Http\Controllers\Dashboards\PembayaranController::class, 'store'])->name('store');
             Route::post('/view', [App\Http\Controllers\Dashboards\PembayaranController::class, 'view'])->name('view');

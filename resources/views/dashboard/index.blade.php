@@ -138,6 +138,15 @@
                     <div class="row">
                         <div class="card col-12">
                             <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5>Data Pembayaran Terbaru</h5>
+                                    <a href="{{ route('pembayaran.index') }}" class="btn btn-sm btn-primary"><i
+                                            class="fas fa-list mr-2"></i> Lihat Semua
+                                        Pembayaran</a>
+                                </div>
+
+                                <hr class="mb-3">
+
                                 <div class="table-responsive" id="dt-container">
                                     <table class="table table-bordered table-responsive-xl text-center" id="dt-data">
                                         <thead>
@@ -290,7 +299,7 @@
                         orderable: false,
                         searchable: false,
                         render: function(data, type, row) {
-                            return `<a href="{{ url('manage/pembayaran') }}/${row.uuid}" class="btn btn-sm btn-primary"><i class="fas fa-eye"></i></a>`
+                            return `<a href="{{ url('dashboard/pembayaran/detail') }}/${row.uuid}" class="btn btn-sm btn-primary"><i class="fas fa-eye"></i></a>`
                         }
                     }
                 ]

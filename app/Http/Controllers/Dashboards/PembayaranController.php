@@ -161,6 +161,101 @@ class PembayaranController extends Controller
         }
     }
 
+    public function detail_pembayaran($uuid, Request $request)
+    {
+        if ($request->ajax()) {
+            try {
+                $rolePembayaran = Pembayaran::with('role_pembayarans')->where('uuid', $uuid)->first()->role_pembayarans->pluck('role_id');
+                $pembayaran = Pembayaran::where('uuid', $uuid)->first();
+                $users = User::with(['roles'])
+                    ->whereHas('roles', function ($query) use ($rolePembayaran) {
+                        $query->whereIn('id', $rolePembayaran);
+                    })
+                    ->get();
+
+
+                $data = DataTables::of($users)
+                    ->addIndexColumn()
+                    ->addColumn('position', function ($user) {
+                        return $user->position == null ? '-' : $user->position->name;
+                    })
+                    ->addColumn('created_at', function ($user) use ($pembayaran) {
+                        return $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null ? '-' : $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->created_at->format('d-M-Y H:i');
+                    })
+                    ->addColumn('merchant_ref', function ($user) use ($pembayaran) {
+                        return $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null ? '-' : $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->uuid;
+                    })
+                    ->addColumn('status', function ($user) use ($pembayaran) {
+                        if ($user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null) {
+                            return '-';
+                        } else {
+                            if ($user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->status == 'UNPAID') {
+                                return 'Belum Bayar';
+                            } else if ($user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->status == 'PAID') {
+                                return 'Sudah Bayar';
+                            } else if ($user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->status == 'EXPIRED') {
+                                return 'Kadaluarsa';
+                            } else if ($user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->status == 'FAILED') {
+                                return 'Gagal';
+                            }
+                        }
+                    })
+                    ->addColumn('roles', function ($user) {
+                        $roles = '';
+                        foreach ($user->roles as $role) {
+                            $roles .= $role->name . ', ';
+                        }
+                        return strtoupper(rtrim($roles, ', '));
+                    })
+                    ->addColumn('payment_method', function ($user) use ($pembayaran) {
+                        if ($user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null || $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->payment_method == null) {
+                            return '-';
+                        } else {
+                            return $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->payment_method;
+                        }
+                    })
+                    ->addColumn('total_fee', function ($user) use ($pembayaran) {
+                        if ($user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null || $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->total_fee == null) {
+                            return 0;
+                        } else {
+                            return $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->total_fee;
+                        }
+                    })
+                    ->addColumn('subtotal', function ($user) use ($pembayaran) {
+                        if ($user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null || $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->subtotal == null) {
+                            return 0;
+                        } else {
+                            return $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->subtotal;
+                        }
+                    })
+                    ->addColumn('total', function ($user) use ($pembayaran) {
+                        if ($user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first() == null || $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->total == null) {
+                            return 0;
+                        } else {
+                            return $user->pembayaran_users->where('pembayaran_id', $pembayaran->id)->first()->total;
+                        }
+                    })
+                    ->toJson();
+
+                return $data;
+            } catch (\Throwable $th) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $th->getMessage(),
+                ]);
+            }
+        } else {
+            $pembayaran = Pembayaran::where('uuid', $uuid)->first();
+            if (!$pembayaran) {
+                return back()->with('error', 'Pembayaran tidak ditemukan');
+            }
+
+            return view('dashboard.pembayaran.detail', [
+                'pembayaran' => $pembayaran,
+            ]);
+        }
+    }
+
     public function detail(Request $request)
     {
         $pembayaran = Pembayaran::where('uuid', $request->uuid)->first();
