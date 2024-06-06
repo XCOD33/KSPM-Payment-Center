@@ -20,22 +20,22 @@ class DatabaseSeeder extends Seeder
         // \App\Models\User::factory(3)->create();
 
         $positions = [
-            'Ketua',
-            'Wakil Ketua',
+            'Ketua Umum',
+            'Wakil Ketua Umum',
             'Sekretaris Umum',
             'Bendahara Umum',
             'Koordinator HRD',
-            'Koordinator RND',
+            'Koordinator RnD',
             'Koordinator PRD',
             'Koordinator Edukasi',
             'Koordinator Investasi',
             'Staff HRD',
-            'Staff RND',
+            'Staff RnD',
             'Staff PRD',
             'Staff Edukasi',
             'Staff Investasi',
             'Anggota Magang',
-            'super-admin'
+            'super-admin',
         ];
 
         foreach ($positions as $index => $position) {
