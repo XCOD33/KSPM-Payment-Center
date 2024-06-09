@@ -400,7 +400,7 @@ class PembayaranController extends Controller
         $status = strtoupper((string) $data->status);
 
         if ($data->is_closed_payment === 1) {
-            $invoice = PembayaranUser::where('invoice_id', $invoiceId)
+            $invoice = PembayaranUser::where('uuid', $invoiceId)
                 ->where('status', '=', 'UNPAID')
                 ->first();
 

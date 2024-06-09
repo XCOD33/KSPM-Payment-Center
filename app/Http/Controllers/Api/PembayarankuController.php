@@ -179,7 +179,7 @@ class PembayarankuController extends Controller
 
         $pembayaran_user = $this->get_pembayaran_user($pembayaran->id);
 
-        $merchant_ref = Uuid::uuid4();
+        $merchant_ref = $pembayaran_user->uuid;
 
         $dataToTripay = [
             'method' => $request->payment_code,
