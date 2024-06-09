@@ -11,6 +11,7 @@ use Nekoding\Tripay\Networks\HttpClient;
 use Nekoding\Tripay\Signature;
 use Nekoding\Tripay\Tripay;
 use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\Uuid as UidUuid;
 
 class PembayarankuController extends Controller
 {
@@ -178,9 +179,11 @@ class PembayarankuController extends Controller
 
         $pembayaran_user = $this->get_pembayaran_user($pembayaran->id);
 
+        $merchant_ref = Uuid::uuid4();
+
         $dataToTripay = [
             'method' => $request->payment_code,
-            'merchant_ref' => $pembayaran_user->invoice_id,
+            'merchant_ref' => $merchant_ref,
             'amount' => $pembayaran->nominal,
             'customer_name' => $this->user->name,
             'customer_email' => $this->user->email,
@@ -194,7 +197,7 @@ class PembayarankuController extends Controller
             ],
             'return_url' => 'https://localhost:8000',
             'expired_time' => (time() + (24 * 60 * 60)), // 24 jam
-            'signature' => Signature::generate($pembayaran_user->invoice_id . $pembayaran->nominal)
+            'signature' => Signature::generate($merchant_ref . $pembayaran->nominal)
         ];
 
         $res = $this->tripay->createTransaction($dataToTripay, Tripay::CLOSE_TRANSACTION);
@@ -219,79 +222,88 @@ class PembayarankuController extends Controller
     {
         $callbackSignature = $request->server('HTTP_X_CALLBACK_SIGNATURE');
         $json = $request->getContent();
-        $signature = hash_hmac('sha256', $json, config('app.tripay_private_key'));
+        $signature = hash_hmac('sha256', $json, env('TRIPAY_PRIVATE_KEY'));
 
         if ($signature !== (string) $callbackSignature) {
-            return response()->json([
+            return Response::json([
                 'success' => false,
-                'message' => 'Signature tidak valid'
+                'message' => 'Invalid signature',
             ]);
         }
 
         if ('payment_status' !== (string) $request->server('HTTP_X_CALLBACK_EVENT')) {
-            return response()->json([
+            return Response::json([
                 'success' => false,
-                'message' => 'Event tidak valid'
+                'message' => 'Unrecognized callback event, no action was taken',
             ]);
         }
 
         $data = json_decode($json);
 
         if (JSON_ERROR_NONE !== json_last_error()) {
-            return response()->json([
+            return Response::json([
                 'success' => false,
-                'message' => 'Data tidak valid'
+                'message' => 'Invalid data sent by tripay',
             ]);
         }
 
-        $invoice_id = $data->merchant_ref;
+        $invoiceId = $data->merchant_ref;
         $status = strtoupper((string) $data->status);
 
         if ($data->is_closed_payment === 1) {
-            $pembayaran_user = PembayaranUser::where('invoice_id', $invoice_id)
-                ->where('status', 'UNPAID')
+            $invoice = PembayaranUser::where('invoice_id', $invoiceId)
+                ->where('status', '=', 'UNPAID')
                 ->first();
 
-            if (!$pembayaran_user) {
-                return response()->json([
+            if (!$invoice) {
+                return Response::json([
                     'success' => false,
-                    'message' => 'Data pembayaran tidak ditemukan atau sudah dibayar: ' . $invoice_id
+                    'message' => 'No invoice found or already paid: ' . $invoiceId,
                 ]);
             }
 
             switch ($status) {
                 case 'PAID':
-                    $pembayaran_user->update([
-                        'status' => 'PAID',
-                        'total_fee' => $data->total_fee,
-                        'subtotal' => $data->amount_received,
-                        'total' => $data->total_amount
+                    $invoice->update(['status' => 'PAID', 'payment_method' => $data->payment_method, 'payment_method_code' => $data->payment_method_code, 'total_fee' => $data->total_fee, 'total' => $data->total_amount]);
+
+                    $response = Http::withHeaders([
+                        'Authorization' => env('FONNTE')
+                    ])->post('https://api.fonnte.com/send', [
+                        'target' => $invoice->user->phone,
+                        'message' => "Halo " . $invoice->user->name . ",\n\nSalam sejahtera. Kami ingin memberitahukan bahwa pembayaran untuk *" . $invoice->pembayaran->name . "* telah kami terima.\n\nBerikut adalah rincian pembayaran:\n\n- Jumlah Pembayaran : Rp" . number_format($invoice->subtotal, 0, ',', '.') . "\n- Nomor Invoice : " . $invoice->invoice_id . "\n- Biaya Admin : Rp" . number_format($invoice->total_fee, 0, ',', '.') . "\n- Total Pembayaran : Rp" . number_format($invoice->total, 0, ',', '.') . "\n- Cetak Bukti Pembayaran : " . url('dashboard/pembayaranku/view-invoice', $invoice->invoice_id) . "\n\nTerima kasih telah melakukan pembayaran. Semoga harimu menyenangkan.\n\nHormat Kami,\nTim Bendahara KSPM UTY",
                     ]);
+                    if ($response->successful()) {
+                        $response = $response->json();
+                        if ($response['status'] == false) {
+                            return Response::json([
+                                'success' => false,
+                                'message' => 'Gagal mengirim SMS',
+                            ]);
+                        };
+                    } else {
+                        return Response::json([
+                            'success' => false,
+                            'message' => 'Gagal mengirim SMS',
+                        ]);
+                    }
                     break;
 
                 case 'EXPIRED':
-                    $pembayaran_user->update([
-                        'status' => 'EXPIRED'
-                    ]);
+                    $invoice->update(['status' => 'EXPIRED']);
                     break;
 
                 case 'FAILED':
-                    $pembayaran_user->update([
-                        'status' => 'FAILED'
-                    ]);
+                    $invoice->update(['status' => 'FAILED']);
                     break;
 
                 default:
-                    return response()->json([
+                    return Response::json([
                         'success' => false,
-                        'message' => 'Status tidak valid'
+                        'message' => 'Unrecognized payment status',
                     ]);
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Pembayaran berhasil'
-            ]);
+            return Response::json(['success' => true]);
         }
     }
 }
